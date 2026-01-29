@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Counter from "./components/counter/counter";
 import StepThrough from "./components/step-through/step-through";
+import SkillTree from "./components/skill-tree/skill-tree";
 
 function App() {
   const navigate = useNavigate();
@@ -9,20 +10,22 @@ function App() {
 
   return (
     <>
-      <nav style={{
-        width: "100%",
-        padding: "1rem 0",
-        background: "#282c34",
-        color: "white",
-        textAlign: "center",
-        fontSize: "1.5rem",
-        fontWeight: "bold",
-        letterSpacing: "2px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative"
-      }}>
+      <nav
+        style={{
+          width: "100%",
+          padding: "1rem 0",
+          background: "#282c34",
+          color: "white",
+          textAlign: "center",
+          fontSize: "1.5rem",
+          fontWeight: "bold",
+          letterSpacing: "2px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+        }}
+      >
         <button
           style={{
             position: "absolute",
@@ -34,7 +37,7 @@ function App() {
             borderRadius: "4px",
             cursor: "pointer",
             fontSize: "1rem",
-            fontWeight: "bold"
+            fontWeight: "bold",
           }}
           onClick={() => navigate("/")}
         >
@@ -43,11 +46,13 @@ function App() {
         React Portfolio
       </nav>
       {location.pathname === "/" && (
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          margin: "2rem 0"
-        }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            margin: "2rem 0",
+          }}
+        >
           <button
             style={{
               padding: "0.75rem 2rem",
@@ -57,7 +62,7 @@ function App() {
               background: "#61dafb",
               color: "#282c34",
               cursor: "pointer",
-              fontWeight: "bold"
+              fontWeight: "bold",
             }}
             onClick={() => navigate("/counter")}
           >
@@ -66,11 +71,13 @@ function App() {
         </div>
       )}
       {location.pathname === "/" && (
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          margin: "2rem 0"
-        }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            margin: "2rem 0",
+          }}
+        >
           <button
             style={{
               padding: "0.75rem 2rem",
@@ -80,7 +87,7 @@ function App() {
               background: "#61dafb",
               color: "#282c34",
               cursor: "pointer",
-              fontWeight: "bold"
+              fontWeight: "bold",
             }}
             onClick={() => navigate("/step-through")}
           >
@@ -88,9 +95,35 @@ function App() {
           </button>
         </div>
       )}
+      {location.pathname === "/" && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            margin: "2rem 0",
+          }}
+        >
+          <button
+            style={{
+              padding: "0.75rem 2rem",
+              fontSize: "1rem",
+              borderRadius: "5px",
+              border: "none",
+              background: "#61dafb",
+              color: "#282c34",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+            onClick={() => navigate("/skill-tree")}
+          >
+            Skill Tree
+          </button>
+        </div>
+      )}
       <Routes>
         <Route path="/counter" element={<Counter />} />
         <Route path="/step-through" element={<StepThrough />} />
+        <Route path="/skill-tree" element={<SkillTree />} />
         {/* Add other routes here */}
       </Routes>
     </>
