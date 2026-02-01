@@ -1,13 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import Counter from "./components/counter/counter";
 import StepThrough from "./components/step-through/step-through";
 import SkillTree from "./components/skill-tree/skill-tree";
 import UserDashboard from "./components/user-dashboard/user-dashboard";
+import FundSelection from "./components/fund-selection";
+import { FundType } from "./components/fund-selection";
+import { initializeTasksForFund } from "./store/tasks-slice";
 
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const [hasSelectedFund, setHasSelectedFund] = useState(false);
+
+  // Check if user has selected a fund type
+  useEffect(() => {
+    const selectedFund = localStorage.getItem("selectedFundType");
+    const fundSelected = !!selectedFund;
+    setHasSelectedFund(fundSelected);
+    
+    if (!fundSelected && location.pathname !== "/fund-selection") {
+      navigate("/fund-selection");
+    }
+  }, [navigate, location.pathname]);
+
+  const handleFundSelect = (fundType: FundType) => {
+    // Initialize tasks for the selected fund type
+    dispatch(initializeTasksForFund(fundType));
+    // Update state and navigate to dashboard after fund selection
+    setHasSelectedFund(true);
+    navigate("/user-dashboard");
+  };
 
   return (
     <>
@@ -15,8 +40,8 @@ function App() {
         style={{
           width: "100%",
           padding: "1rem 0",
-          background: "#282c34",
-          color: "white",
+          background: "#ffffff",
+          color: "#000000",
           textAlign: "center",
           fontSize: "1.5rem",
           fontWeight: "bold",
@@ -25,6 +50,8 @@ function App() {
           alignItems: "center",
           justifyContent: "space-between",
           position: "relative",
+          borderBottom: "2px solid black",
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
         }}
       >
         <div
@@ -36,8 +63,8 @@ function App() {
           <button
             style={{
               background: "transparent",
-              border: "1px solid #61dafb",
-              color: "#61dafb",
+              border: "1px solid black",
+              color: "black",
               padding: "0.5rem 1rem",
               borderRadius: "4px",
               cursor: "pointer",
@@ -45,79 +72,34 @@ function App() {
               fontWeight: "bold",
               marginRight: "1rem",
             }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/fund-selection")}
           >
-            Home
+            Fund Launch
           </button>
-          <button
-            style={{
-              background: "transparent",
-              border: "1px solid #61dafb",
-              color: "#61dafb",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "1rem",
-              fontWeight: "bold",
-            }}
-            onClick={() => navigate("/user-dashboard")}
-          >
-            User Dashboard
-          </button>
+          {hasSelectedFund && (
+            <button
+              style={{
+                background: "transparent",
+                border: "1px solid black",
+                color: "black",
+                padding: "0.5rem 1rem",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontWeight: "bold",
+              }}
+              onClick={() => navigate("/user-dashboard")}
+            >
+              Dashboard
+            </button>
+          )}
         </div>
-        <div>React Portfolio</div>
+        <div style={{ color: "#fbbf24", fontSize: "1.2rem" }}>Fund Launch Platform</div>
       </nav>
-      {location.pathname === "/" && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "2rem 0",
-          }}
-        >
-          <button
-            style={{
-              padding: "0.75rem 2rem",
-              fontSize: "1rem",
-              borderRadius: "5px",
-              border: "none",
-              background: "#61dafb",
-              color: "#282c34",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => navigate("/counter")}
-          >
-            Counter
-          </button>
-        </div>
-      )}
-      {location.pathname === "/" && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "2rem 0",
-          }}
-        >
-          <button
-            style={{
-              padding: "0.75rem 2rem",
-              fontSize: "1rem",
-              borderRadius: "5px",
-              border: "none",
-              background: "#61dafb",
-              color: "#282c34",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => navigate("/step-through")}
-          >
-            Step Through
-          </button>
-        </div>
-      )}
+
       <Routes>
+        <Route path="/" element={<FundSelection onSelectFund={handleFundSelect} />} />
+        <Route path="/fund-selection" element={<FundSelection onSelectFund={handleFundSelect} />} />
         <Route path="/counter" element={<Counter />} />
         <Route path="/step-through" element={<StepThrough />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />

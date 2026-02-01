@@ -89,8 +89,8 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
           zIndex: 1,
           background: "rgba(0, 0, 0, 0.9)",
           backdropFilter: "blur(20px)",
-          border: "2px solid #00d4ff",
-          boxShadow: "0 0 40px rgba(0, 212, 255, 0.3)",
+          border: "2px solid #fbbf24",
+          boxShadow: "0 0 20px rgba(251, 191, 36, 0.2)",
         }}
       >
         {/* Skip Button */}
@@ -106,7 +106,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             minWidth: "auto",
             p: { xs: 1, sm: 1.5 },
             "&:hover": {
-              color: "#00d4ff",
+              color: "#fbbf24",
             },
           }}
         >
@@ -135,20 +135,20 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                     display: { xs: "none", sm: "block" }
                   },
                   "& .MuiStepLabel-label.Mui-active": {
-                    color: "#00d4ff",
+                    color: "#fbbf24",
                   },
                   "& .MuiStepLabel-label.Mui-completed": {
-                    color: "#00ff88",
+                    color: "#6b9970",
                   },
                   "& .MuiStepIcon-root": {
                     color: "#333",
                     fontSize: { xs: "1.5rem", sm: "2rem" }
                   },
                   "& .MuiStepIcon-root.Mui-active": {
-                    color: "#00d4ff",
+                    color: "#fbbf24",
                   },
                   "& .MuiStepIcon-root.Mui-completed": {
-                    color: "#00ff88",
+                    color: "#6b9970",
                   },
                 }}
               />
@@ -171,9 +171,9 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             variant="h4"
             sx={{
               fontWeight: "bold",
-              color: "#00d4ff",
+              color: "#fbbf24",
               mb: { xs: 1, sm: 2 },
-              textShadow: "0 0 20px rgba(0, 212, 255, 0.6)",
+              textShadow: "0 0 10px rgba(251, 191, 36, 0.3)",
               fontSize: { xs: "1.25rem", sm: "1.75rem", md: "2.125rem" },
             }}
           >
@@ -207,12 +207,12 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             disabled={activeStep === 0}
             startIcon={!isMobile && <ArrowBackIcon />}
             sx={{
-              color: activeStep === 0 ? "#333" : "#00d4ff",
+              color: activeStep === 0 ? "#333" : "#fbbf24",
               textTransform: "none",
               fontSize: { xs: "0.875rem", sm: "1rem" },
               order: { xs: 2, sm: 1 },
               "&:hover": {
-                backgroundColor: "rgba(0, 212, 255, 0.1)",
+                backgroundColor: "rgba(251, 191, 36, 0.1)",
               },
             }}
           >
@@ -225,18 +225,18 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             variant="contained"
             fullWidth={isMobile}
             sx={{
-              backgroundColor: "#00d4ff",
+              backgroundColor: "#fbbf24",
               color: "#000",
               textTransform: "none",
               fontSize: { xs: "0.875rem", sm: "1rem" },
               fontWeight: "bold",
               px: { xs: 3, sm: 4 },
               py: { xs: 1.5, sm: 1 },
-              boxShadow: "0 0 20px rgba(0, 212, 255, 0.5)",
+              boxShadow: "0 0 10px rgba(251, 191, 36, 0.3)",
               order: { xs: 1, sm: 2 },
               "&:hover": {
-                backgroundColor: "#00b8e6",
-                boxShadow: "0 0 30px rgba(0, 212, 255, 0.7)",
+                backgroundColor: "#d9a021",
+                boxShadow: "0 0 15px rgba(251, 191, 36, 0.4)",
               },
             }}
           >
@@ -259,9 +259,9 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                 width: { xs: 6, sm: 8 },
                 height: { xs: 6, sm: 8 },
                 borderRadius: "50%",
-                backgroundColor: index === activeStep ? "#00d4ff" : "#333",
+                backgroundColor: index === activeStep ? "#fbbf24" : "#333",
                 transition: "all 0.3s ease",
-                boxShadow: index === activeStep ? "0 0 10px rgba(0, 212, 255, 0.8)" : "none",
+                boxShadow: index === activeStep ? "0 0 10px rgba(251, 191, 36, 0.5)" : "none",
               }}
             />
           ))}

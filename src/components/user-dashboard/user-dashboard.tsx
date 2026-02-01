@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Card, Chip, Button, useMediaQuery, useTheme } from "@mui/material";
 import { PieChart, Pie, Cell, Label } from "recharts";
-import { useCategoryStats, useTaskStats, useIsOnboardingComplete } from "../../store/task-hooks";
+import { useCategoryStats, useTaskStats, useIsInitialTasksComplete } from "../../store/task-hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/index";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
@@ -17,10 +17,10 @@ interface LabelPosition {
 }
 
 const categoryColors: Record<string, { bg: string; color: string; glow: string }> = {
-  onboarding: { bg: "#2e1a47", color: "#b794f6", glow: "rgba(183, 148, 246, 0.4)" },
-  frontend: { bg: "#1a1a2e", color: "#00d4ff", glow: "rgba(0, 212, 255, 0.4)" },
-  backend: { bg: "#0f2027", color: "#00ff88", glow: "rgba(0, 255, 136, 0.4)" },
-  devops: { bg: "#2c1810", color: "#ff8c00", glow: "rgba(255, 140, 0, 0.4)" },
+  initialTasks: { bg: "#2d2d2d", color: "#6b7280", glow: "rgba(107, 114, 128, 0.3)" },
+  sfr: { bg: "#2d2d2d", color: "#3b82f6", glow: "rgba(59, 130, 246, 0.3)" },
+  commercial: { bg: "#2d2d2d", color: "#10b981", glow: "rgba(16, 185, 129, 0.3)" },
+  specialty: { bg: "#2d2d2d", color: "#8b5cf6", glow: "rgba(139, 92, 246, 0.3)" },
 };
 
 export default function UserDashboard() {
@@ -32,15 +32,28 @@ export default function UserDashboard() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if fund type is selected
+  useEffect(() => {
+    const selectedFund = localStorage.getItem("selectedFundType");
+    if (!selectedFund) {
+      navigate("/fund-selection");
+      return;
+    }
+  }, [navigate]);
   
   // Get task data from Redux
   const tasks = useSelector((state: RootState) => state.tasks);
-  const onboardingStats = useCategoryStats("onboarding");
-  const frontendStats = useCategoryStats("frontend");
-  const backendStats = useCategoryStats("backend");
-  const devopsStats = useCategoryStats("devops");
+  const initialTasksStats = useCategoryStats("initialTasks");
+  const sfrStats = useCategoryStats("sfr");
+  const commercialStats = useCategoryStats("commercial");
+  const specialtyStats = useCategoryStats("specialty");
   const totalStats = useTaskStats();
-  const isOnboardingComplete = useIsOnboardingComplete();
+  const isInitialTasksComplete = useIsInitialTasksComplete();
+
+  // Check if a fund has been selected (fund categories should unlock immediately)
+  const selectedFundType = localStorage.getItem("selectedFundType") as "sfr" | "commercial" | "specialty" | null;
+  const hasSelectedFund = !!selectedFundType;
 
   // Check if first visit
   useEffect(() => {
@@ -67,44 +80,44 @@ export default function UserDashboard() {
 
   const categories = [
     {
-      name: "Onboarding",
-      color: categoryColors.onboarding.color,
-      glow: categoryColors.onboarding.glow,
-      category: "onboarding",
-      taskData: tasks.onboarding,
-      value: onboardingStats.completed,
-      max: onboardingStats.total,
+      name: "Initial Tasks",
+      color: categoryColors.initialTasks.color,
+      glow: categoryColors.initialTasks.glow,
+      category: "initialTasks",
+      taskData: tasks.initialTasks,
+      value: initialTasksStats.completed,
+      max: initialTasksStats.total,
       locked: false,
     },
     {
-      name: "Frontend",
-      color: categoryColors.frontend.color,
-      glow: categoryColors.frontend.glow,
-      category: "frontend",
-      taskData: tasks.frontend,
-      value: frontendStats.completed,
-      max: frontendStats.total,
-      locked: !isOnboardingComplete,
+      name: "SFR Fund",
+      color: categoryColors.sfr.color,
+      glow: categoryColors.sfr.glow,
+      category: "sfr",
+      taskData: tasks.sfr,
+      value: sfrStats.completed,
+      max: sfrStats.total,
+      locked: !isInitialTasksComplete,
     },
     {
-      name: "Backend",
-      color: categoryColors.backend.color,
-      glow: categoryColors.backend.glow,
-      category: "backend",
-      taskData: tasks.backend,
-      value: backendStats.completed,
-      max: backendStats.total,
-      locked: !isOnboardingComplete,
+      name: "Commercial Fund",
+      color: categoryColors.commercial.color,
+      glow: categoryColors.commercial.glow,
+      category: "commercial",
+      taskData: tasks.commercial,
+      value: commercialStats.completed,
+      max: commercialStats.total,
+      locked: !isInitialTasksComplete,
     },
     {
-      name: "DevOps",
-      color: categoryColors.devops.color,
-      glow: categoryColors.devops.glow,
-      category: "devops",
-      taskData: tasks.devops,
-      value: devopsStats.completed,
-      max: devopsStats.total,
-      locked: !isOnboardingComplete,
+      name: "Specialty Fund",
+      color: categoryColors.specialty.color,
+      glow: categoryColors.specialty.glow,
+      category: "specialty",
+      taskData: tasks.specialty,
+      value: specialtyStats.completed,
+      max: specialtyStats.total,
+      locked: !isInitialTasksComplete,
     },
   ];
 
@@ -163,22 +176,11 @@ export default function UserDashboard() {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-            background: "radial-gradient(ellipse at top, #1a1a2e, #000000)",
+            background: "rgba(247, 247, 247, 0.98)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             p: { xs: 2, sm: 3 },
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
-              backgroundSize: "50px 50px",
-              opacity: 0.3,
-            },
           }}
         >
           <Card
@@ -190,8 +192,8 @@ export default function UserDashboard() {
               zIndex: 1,
               background: "rgba(0, 0, 0, 0.9)",
               backdropFilter: "blur(20px)",
-              border: "2px solid #00d4ff",
-              boxShadow: "0 0 40px rgba(0, 212, 255, 0.3)",
+              border: "2px solid #fbbf24",
+              boxShadow: "0 0 20px rgba(251, 191, 36, 0.2)",
               textAlign: "center",
             }}
           >
@@ -205,8 +207,8 @@ export default function UserDashboard() {
               <HelpOutlineIcon
                 sx={{
                   fontSize: { xs: 60, sm: 70, md: 80 },
-                  color: "#00d4ff",
-                  filter: "drop-shadow(0 0 20px rgba(0, 212, 255, 0.8))",
+                  color: "#5b8ec4",
+                  filter: "drop-shadow(0 0 10px rgba(91, 142, 196, 0.3))",
                 }}
               />
             </Box>
@@ -215,9 +217,9 @@ export default function UserDashboard() {
               variant="h3"
               sx={{
                 fontWeight: "bold",
-                color: "#00d4ff",
+                color: "#000000",
                 mb: { xs: 1, sm: 2 },
-                textShadow: "0 0 20px rgba(0, 212, 255, 0.6)",
+                textShadow: "none",
                 fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
               }}
             >
@@ -227,7 +229,7 @@ export default function UserDashboard() {
             <Typography
               variant="h5"
               sx={{
-                color: "#ccc",
+                color: "#666666",
                 mb: { xs: 3, sm: 4 },
                 lineHeight: 1.6,
                 fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
@@ -250,17 +252,17 @@ export default function UserDashboard() {
                 startIcon={<CheckCircleIcon />}
                 fullWidth={isMobile}
                 sx={{
-                  backgroundColor: "#00ff88",
-                  color: "#000",
+                  backgroundColor: "#6b9970",
+                  color: "#ffffff",
                   textTransform: "none",
                   fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
                   fontWeight: "bold",
                   px: { xs: 3, sm: 4, md: 5 },
                   py: { xs: 1.5, sm: 2 },
-                  boxShadow: "0 0 20px rgba(0, 255, 136, 0.5)",
+                  boxShadow: "0 0 15px rgba(107, 153, 112, 0.4)",
                   "&:hover": {
-                    backgroundColor: "#00cc6a",
-                    boxShadow: "0 0 30px rgba(0, 255, 136, 0.7)",
+                    backgroundColor: "#5a8560",
+                    boxShadow: "0 0 20px rgba(107, 153, 112, 0.6)",
                     transform: "scale(1.05)",
                   },
                   transition: "all 0.3s ease",
@@ -275,8 +277,8 @@ export default function UserDashboard() {
                 startIcon={<CancelIcon />}
                 fullWidth={isMobile}
                 sx={{
-                  borderColor: "#00d4ff",
-                  color: "#00d4ff",
+                  borderColor: "#fbbf24",
+                  color: "#fbbf24",
                   textTransform: "none",
                   fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
                   fontWeight: "bold",
@@ -284,8 +286,8 @@ export default function UserDashboard() {
                   py: { xs: 1.5, sm: 2 },
                   borderWidth: 2,
                   "&:hover": {
-                    borderColor: "#00b8e6",
-                    backgroundColor: "rgba(0, 212, 255, 0.1)",
+                    borderColor: "#d9a021",
+                    backgroundColor: "rgba(251, 191, 36, 0.15)",
                     borderWidth: 2,
                     transform: "scale(1.05)",
                   },
@@ -306,7 +308,7 @@ export default function UserDashboard() {
       <Box
         sx={{
           minHeight: "100vh",
-          background: "radial-gradient(ellipse at top, #1a1a2e, #000000)",
+          background: "#f7f7f7",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -314,17 +316,6 @@ export default function UserDashboard() {
           position: "relative",
           overflow: "hidden",
           p: { xs: 2, sm: 3 },
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
-            backgroundSize: "50px 50px",
-            opacity: 0.3,
-          },
         }}
       >
         {/* Header */}
@@ -333,34 +324,34 @@ export default function UserDashboard() {
             variant="h2"
             sx={{
               fontWeight: "bold",
-              color: "#00d4ff",
+              color: "#000000",
               mb: { xs: 1, sm: 2 },
-              textShadow: "0 0 20px rgba(0, 212, 255, 0.8)",
+              textShadow: "none",
               letterSpacing: { xs: "1px", sm: "2px", md: "3px" },
               fontSize: { xs: "1.5rem", sm: "2.5rem", md: "3.75rem" },
             }}
           >
-            SKILL DASHBOARD
+            FUND LAUNCH DASHBOARD
           </Typography>
           <Chip
-            label={`Total Progress: ${score} / ${max}`}
+            label={`Launch Progress: ${score} / ${max}`}
             sx={{
-              backgroundColor: "#00d4ff",
+              backgroundColor: "#fbbf24",
               color: "#000",
               fontWeight: 700,
               fontSize: { xs: "0.875rem", sm: "1rem", md: "1.1rem" },
               padding: { xs: "6px 12px", sm: "8px 16px" },
-              boxShadow: "0 0 20px rgba(0, 212, 255, 0.5)",
+              boxShadow: "0 0 15px rgba(251, 191, 36, 0.3)",
             }}
           />
-          {!isOnboardingComplete && (
+          {!isInitialTasksComplete && (
             <Typography
               variant="body1"
               sx={{
-                color: "#b794f6",
+                color: "#666666",
                 mt: { xs: 1, sm: 2 },
                 fontWeight: 600,
-                textShadow: "0 0 10px rgba(183, 148, 246, 0.6)",
+                textShadow: "none",
                 fontSize: { xs: "0.875rem", sm: "1rem" },
                 px: 2,
               }}
@@ -378,18 +369,18 @@ export default function UserDashboard() {
           zIndex: 1,
           mb: { xs: 2, sm: 0 }
         }}>
-          {/* Glow effect for active slice */}
           {activeIndex !== null && !categories[activeIndex].locked && (
             <Box
               sx={{
                 position: "absolute",
                 top: "50%",
                 left: "50%",
-                width: "100%",
-                height: "100%",
+                width: "calc(100% - 20px)",
+                height: "calc(100% - 20px)",
                 transform: "translate(-50%, -50%)",
                 borderRadius: "50%",
-                boxShadow: `0 0 ${isMobile ? "40px" : "60px"} ${pieData[activeIndex].glow}`,
+                border: `3px solid ${pieData[activeIndex].color}`,
+                opacity: 0.6,
                 pointerEvents: "none",
                 transition: "all 0.3s ease",
               }}
@@ -419,15 +410,15 @@ export default function UserDashboard() {
                   style={{
                     cursor: entry.locked ? "not-allowed" : "pointer",
                     filter: entry.locked 
-                      ? "brightness(0.5)" 
+                      ? "brightness(0.6) saturate(0.5)" 
                       : activeIndex === idx 
-                      ? `drop-shadow(0 0 10px ${entry.color}) brightness(1.3)` 
-                      : "brightness(1)",
+                      ? "brightness(1.15)" 
+                      : "brightness(0.95)",
                     transition: "all 0.3s ease-in-out",
-                    opacity: entry.locked ? 0.4 : 1,
+                    opacity: entry.locked ? 0.3 : 1,
                   }}
-                  stroke="#000"
-                  strokeWidth={2}
+                  stroke="#ffffff"
+                  strokeWidth={3}
                 />
               ))}
               <Label
@@ -458,20 +449,21 @@ export default function UserDashboard() {
                   width: isTablet ? 100 : 120,
                   p: { xs: 1, sm: 1.5 },
                   textAlign: "center",
-                  background: categoryInfo.locked ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.8)",
+                  background: categoryInfo.locked ? "rgba(200, 200, 200, 0.9)" : "rgba(0, 0, 0, 0.8)",
                   backdropFilter: "blur(10px)",
-                  border: `2px solid ${cat.color}`,
+                  border: categoryInfo.locked ? "2px solid #cccccc" : `2px solid ${cat.color}`,
                   borderRadius: 2,
                   cursor: categoryInfo.locked ? "not-allowed" : "pointer",
                   transition: "all 0.3s ease",
                   boxShadow: activeIndex === idx && !categoryInfo.locked
-                    ? `0 0 20px ${cat.glow}` 
-                    : `0 0 10px ${cat.glow}`,
+                    ? `0 8px 24px ${cat.glow}, 0 0 0 3px ${cat.color}20` 
+                    : categoryInfo.locked ? "0 2px 8px rgba(0, 0, 0, 0.1)" : `0 4px 12px rgba(0, 0, 0, 0.15)`,
                   transform: activeIndex === idx && !categoryInfo.locked ? "scale(1.1)" : "scale(1)",
-                  opacity: categoryInfo.locked ? 0.5 : 1,
+                  opacity: 1,
                   "&:hover": categoryInfo.locked ? {} : {
                     transform: "scale(1.15)",
-                    boxShadow: `0 0 30px ${cat.glow}`,
+                    boxShadow: `0 12px 32px ${cat.glow}, 0 0 0 3px ${cat.color}30`,
+                    background: "rgba(0, 0, 0, 0.9)",
                   },
                 }}
               >
@@ -482,20 +474,21 @@ export default function UserDashboard() {
                       top: -10,
                       right: -10,
                       fontSize: { xs: 16, sm: 20 },
-                      color: "#999",
-                      backgroundColor: "#000",
+                      color: "#666666",
+                      backgroundColor: "#f0f0f0",
                       borderRadius: "50%",
                       p: 0.5,
+                      border: "2px solid #cccccc",
                     }}
                   />
                 )}
                 <Typography
                   variant="h6"
                   sx={{
-                    color: cat.color,
+                    color: categoryInfo.locked ? "#999999" : cat.color,
                     fontWeight: "bold",
                     mb: 0.5,
-                    textShadow: `0 0 10px ${cat.glow}`,
+                    textShadow: categoryInfo.locked ? "none" : `0 0 10px ${cat.glow}`,
                     fontSize: { xs: "0.875rem", sm: "1rem", md: "1.25rem" },
                   }}
                 >
@@ -504,7 +497,7 @@ export default function UserDashboard() {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "#fff",
+                    color: "#ffffff",
                     fontWeight: 600,
                     fontSize: { xs: "0.7rem", sm: "0.875rem" },
                   }}
@@ -533,17 +526,19 @@ export default function UserDashboard() {
                 onClick={() => handleCategoryClick(cat)}
                 sx={{
                   p: 2,
-                  background: cat.locked ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.8)",
+                  background: cat.locked ? "rgba(200, 200, 200, 0.9)" : "rgba(0, 0, 0, 0.8)",
                   backdropFilter: "blur(10px)",
-                  border: `2px solid ${cat.color}`,
+                  border: cat.locked ? "2px solid #cccccc" : `2px solid ${cat.color}`,
                   borderRadius: 2,
                   cursor: cat.locked ? "not-allowed" : "pointer",
-                  opacity: cat.locked ? 0.5 : 1,
+                  opacity: 1,
                   position: "relative",
                   transition: "all 0.3s ease",
+                  overflow: "visible",
+                  boxShadow: cat.locked ? "0 2px 8px rgba(0, 0, 0, 0.1)" : `0 4px 12px rgba(0, 0, 0, 0.15)`,
                   "&:active": !cat.locked ? {
                     transform: "scale(0.98)",
-                    boxShadow: `0 0 20px ${cat.glow}`,
+                    boxShadow: `0 8px 24px ${cat.glow}, 0 0 0 3px ${cat.color}20`,
                   } : {},
                 }}
               >
@@ -551,20 +546,26 @@ export default function UserDashboard() {
                   <LockIcon
                     sx={{
                       position: "absolute",
-                      top: 8,
-                      right: 8,
-                      fontSize: 20,
-                      color: "#999",
+                      top: -12,
+                      right: -12,
+                      fontSize: 28,
+                      color: "#666666",
+                      backgroundColor: "#f0f0f0",
+                      borderRadius: "50%",
+                      p: 0.5,
+                      border: "2px solid #cccccc",
+                      zIndex: 2,
                     }}
                   />
                 )}
                 <Typography
                   variant="h6"
                   sx={{
-                    color: cat.color,
+                    color: cat.locked ? "#999999" : cat.color,
                     fontWeight: "bold",
-                    mb: 0.5,
-                    textShadow: `0 0 10px ${cat.glow}`,
+                    mb: 1,
+                    textShadow: cat.locked ? "none" : `0 0 10px ${cat.glow}`,
+                    pr: cat.locked ? 1 : 0,
                   }}
                 >
                   {cat.name}
@@ -572,7 +573,7 @@ export default function UserDashboard() {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "#fff",
+                    color: "#ffffff",
                     fontWeight: 600,
                   }}
                 >
@@ -588,7 +589,7 @@ export default function UserDashboard() {
           <Typography
             variant="body1"
             sx={{
-              color: "rgba(255, 255, 255, 0.7)",
+              color: "#666666",
               fontSize: { xs: "0.875rem", sm: "1rem", md: "1.1rem" },
               animation: "pulse 2s ease-in-out infinite",
               "@keyframes pulse": {
@@ -597,7 +598,7 @@ export default function UserDashboard() {
               },
             }}
           >
-            {isOnboardingComplete ? "Click on a category to view skill tree" : "Start with Onboarding to unlock other categories"}
+            {isInitialTasksComplete ? "Click on a fund category to begin the launch process" : "Complete initial tasks to unlock fund categories"}
           </Typography>
         </Box>
       </Box>
