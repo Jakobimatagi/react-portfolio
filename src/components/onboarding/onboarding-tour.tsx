@@ -35,7 +35,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
   const [activeStep, setActiveStep] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+//   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {

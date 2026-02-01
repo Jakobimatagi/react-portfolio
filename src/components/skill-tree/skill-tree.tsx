@@ -192,7 +192,7 @@ export default function SkillTree() {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  // const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   
   const state = location.state as LocationState | null;
   const category = state?.category || "frontend";

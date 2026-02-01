@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Card, Chip, Button, useMediaQuery, useTheme } from "@mui/material";
-import { PieChart, Pie, Cell, Label, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Label } from "recharts";
 import { useCategoryStats, useTaskStats, useIsOnboardingComplete } from "../../store/task-hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/index";
