@@ -1,58 +1,115 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Card, Chip, Button } from "@mui/material";
 import { PieChart, Pie, Cell, Label } from "recharts";
-import { useCategoryStats, useTaskStats } from "../../store/task-hooks";
+import { useCategoryStats, useTaskStats, useIsOnboardingComplete } from "../../store/task-hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/index";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import OnboardingTour from "../onboarding/onboarding-tour";
+import LockIcon from "@mui/icons-material/Lock";
 
 interface LabelPosition {
   x: number;
   y: number;
 }
 
+const categoryColors: Record<string, { bg: string; color: string; glow: string }> = {
+  onboarding: { bg: "#2e1a47", color: "#b794f6", glow: "rgba(183, 148, 246, 0.4)" },
+  frontend: { bg: "#1a1a2e", color: "#00d4ff", glow: "rgba(0, 212, 255, 0.4)" },
+  backend: { bg: "#0f2027", color: "#00ff88", glow: "rgba(0, 255, 136, 0.4)" },
+  devops: { bg: "#2c1810", color: "#ff8c00", glow: "rgba(255, 140, 0, 0.4)" },
+};
+
 export default function UserDashboard() {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
   // Get task data from Redux
   const tasks = useSelector((state: RootState) => state.tasks);
+  const onboardingStats = useCategoryStats("onboarding");
   const frontendStats = useCategoryStats("frontend");
   const backendStats = useCategoryStats("backend");
   const devopsStats = useCategoryStats("devops");
   const totalStats = useTaskStats();
+  const isOnboardingComplete = useIsOnboardingComplete();
+
+  // Check if first visit
+  useEffect(() => {
+    const hasVisited = localStorage.getItem("hasVisitedDashboard");
+    if (!hasVisited) {
+      setShowPrompt(true);
+    }
+  }, []);
+
+  const handleFirstTimeYes = () => {
+    setShowPrompt(false);
+    setShowOnboarding(true);
+  };
+
+  const handleFirstTimeNo = () => {
+    localStorage.setItem("hasVisitedDashboard", "true");
+    setShowPrompt(false);
+  };
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem("hasVisitedDashboard", "true");
+    setShowOnboarding(false);
+  };
 
   const categories = [
     {
+      name: "Onboarding",
+      color: categoryColors.onboarding.color,
+      glow: categoryColors.onboarding.glow,
+      category: "onboarding",
+      taskData: tasks.onboarding,
+      value: onboardingStats.completed,
+      max: onboardingStats.total,
+      locked: false,
+    },
+    {
       name: "Frontend",
-      color: "#8884d8",
+      color: categoryColors.frontend.color,
+      glow: categoryColors.frontend.glow,
       category: "frontend",
       taskData: tasks.frontend,
       value: frontendStats.completed,
       max: frontendStats.total,
+      locked: !isOnboardingComplete,
     },
     {
       name: "Backend",
-      color: "#82ca9d",
+      color: categoryColors.backend.color,
+      glow: categoryColors.backend.glow,
       category: "backend",
       taskData: tasks.backend,
       value: backendStats.completed,
       max: backendStats.total,
+      locked: !isOnboardingComplete,
     },
     {
       name: "DevOps",
-      color: "#ffc658",
+      color: categoryColors.devops.color,
+      glow: categoryColors.devops.glow,
       category: "devops",
       taskData: tasks.devops,
       value: devopsStats.completed,
       max: devopsStats.total,
+      locked: !isOnboardingComplete,
     },
   ];
 
   const pieData = categories.map((cat) => ({
     name: cat.name,
-    value: cat.value,
-    color: cat.color,
+    value: cat.value || 1,
+    color: cat.locked ? "#555" : cat.color,
+    glow: cat.glow,
+    locked: cat.locked,
   }));
 
   const score = totalStats.completed;
@@ -60,99 +117,398 @@ export default function UserDashboard() {
 
   // Calculate label positions
   const getLabelPosition = (idx: number): LabelPosition => {
-    const total = pieData.reduce((sum, d) => sum + d.value, 0);
+    const total = pieData.reduce((sum, d) => sum + d.value, 0) || 1;
     const startAngle = 90;
     const prevValues = pieData
       .slice(0, idx)
       .reduce((sum, d) => sum + d.value, 0);
     const midAngle =
       startAngle - ((prevValues + pieData[idx].value / 2) / total) * 360;
-    const radius = 185;
+    const radius = 250;
     const rad = (midAngle * Math.PI) / 180;
-    const x = 200 + Math.cos(rad) * radius;
-    const y = 200 - Math.sin(rad) * radius;
+    const x = 250 + Math.cos(rad) * radius;
+    const y = 250 - Math.sin(rad) * radius;
     return { x, y };
   };
 
+  const handleCategoryClick = (category: typeof categories[0]) => {
+    if (category.locked) {
+      return; // Don't navigate if locked
+    }
+    navigate("/skill-tree", {
+      state: { 
+        taskData: category.taskData,
+        category: category.category
+      },
+    });
+  };
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "90vh",
-      }}
-    >
-      <Box sx={{ position: "relative", width: 400, height: 400 }}>
-        <PieChart width={400} height={400}>
-          <Pie
-            data={pieData}
-            dataKey="value"
-            cx="50%"
-            cy="50%"
-            innerRadius={110}
-            outerRadius={170}
-            startAngle={90}
-            endAngle={-270}
-            paddingAngle={2}
-            onClick={(_, idx: number) =>
-              navigate("/skill-tree", {
-                state: { 
-                  taskData: categories[idx].taskData,
-                  category: categories[idx].category
-                },
-              })
-            }
-            isAnimationActive={false}
-            onMouseEnter={(_, idx: number) => setActiveIndex(idx)}
-            onMouseLeave={() => setActiveIndex(null)}
+    <>
+      {/* First Time Prompt */}
+      {showPrompt && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            background: "radial-gradient(ellipse at top, #1a1a2e, #000000)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
+              backgroundSize: "50px 50px",
+              opacity: 0.3,
+            },
+          }}
+        >
+          <Card
+            sx={{
+              maxWidth: 600,
+              width: "90%",
+              p: 5,
+              position: "relative",
+              zIndex: 1,
+              background: "rgba(0, 0, 0, 0.9)",
+              backdropFilter: "blur(20px)",
+              border: "2px solid #00d4ff",
+              boxShadow: "0 0 40px rgba(0, 212, 255, 0.3)",
+              textAlign: "center",
+            }}
           >
-            {pieData.map((entry, idx) => (
-              <Cell
-                key={`cell-${idx}`}
-                fill={entry.color}
-                style={{
-                  cursor: "pointer",
-                  filter: activeIndex === idx ? "brightness(1.15)" : "brightness(1)",
-                  transition: "filter 0.2s ease-in-out",
-                }}
-              />
-            ))}
-            <Label
-              value={`${score} / ${max}`}
-              position="center"
-              style={{ fontSize: 32, fontWeight: "bold", fill: "#333" }}
-            />
-          </Pie>
-        </PieChart>
-        {/* Pie labels around the chart */}
-        {pieData.map((cat, idx) => {
-          const { x, y } = getLabelPosition(idx);
-          return (
-            <Typography
-              key={cat.name}
+            <Box
               sx={{
-                position: "absolute",
-                left: x - 40,
-                top: y - 16,
-                width: 80,
-                textAlign: "center",
-                color: cat.color,
-                fontWeight: "bold",
-                pointerEvents: "none",
-                userSelect: "none",
-                background: "rgba(255,255,255,0.85)",
-                borderRadius: 2,
-                px: 1,
-                fontSize: 16,
-                boxShadow: 1,
+                mb: 3,
+                display: "flex",
+                justifyContent: "center",
               }}
             >
-              {cat.name}
+              <HelpOutlineIcon
+                sx={{
+                  fontSize: 80,
+                  color: "#00d4ff",
+                  filter: "drop-shadow(0 0 20px rgba(0, 212, 255, 0.8))",
+                }}
+              />
+            </Box>
+
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: "bold",
+                color: "#00d4ff",
+                mb: 2,
+                textShadow: "0 0 20px rgba(0, 212, 255, 0.6)",
+              }}
+            >
+              Welcome!
             </Typography>
-          );
-        })}
+
+            <Typography
+              variant="h5"
+              sx={{
+                color: "#ccc",
+                mb: 4,
+                lineHeight: 1.6,
+              }}
+            >
+              Is this your first time using the Skill Dashboard?
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                justifyContent: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <Button
+                onClick={handleFirstTimeYes}
+                variant="contained"
+                startIcon={<CheckCircleIcon />}
+                sx={{
+                  backgroundColor: "#00ff88",
+                  color: "#000",
+                  textTransform: "none",
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  px: 5,
+                  py: 2,
+                  boxShadow: "0 0 20px rgba(0, 255, 136, 0.5)",
+                  "&:hover": {
+                    backgroundColor: "#00cc6a",
+                    boxShadow: "0 0 30px rgba(0, 255, 136, 0.7)",
+                    transform: "scale(1.05)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Yes, Show Me Around
+              </Button>
+
+              <Button
+                onClick={handleFirstTimeNo}
+                variant="outlined"
+                startIcon={<CancelIcon />}
+                sx={{
+                  borderColor: "#00d4ff",
+                  color: "#00d4ff",
+                  textTransform: "none",
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  px: 5,
+                  py: 2,
+                  borderWidth: 2,
+                  "&:hover": {
+                    borderColor: "#00b8e6",
+                    backgroundColor: "rgba(0, 212, 255, 0.1)",
+                    borderWidth: 2,
+                    transform: "scale(1.05)",
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                No, I'm Good
+              </Button>
+            </Box>
+          </Card>
+        </Box>
+      )}
+
+      {/* Onboarding Tour */}
+      {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
+
+      {/* Main Dashboard */}
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "radial-gradient(ellipse at top, #1a1a2e, #000000)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
+            backgroundSize: "50px 50px",
+            opacity: 0.3,
+          },
+        }}
+      >
+        {/* Header */}
+        <Box sx={{ mb: 4, textAlign: "center", position: "relative", zIndex: 1 }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: "bold",
+              color: "#00d4ff",
+              mb: 2,
+              textShadow: "0 0 20px rgba(0, 212, 255, 0.8)",
+              letterSpacing: "3px",
+            }}
+          >
+            SKILL DASHBOARD
+          </Typography>
+          <Chip
+            label={`Total Progress: ${score} / ${max}`}
+            sx={{
+              backgroundColor: "#00d4ff",
+              color: "#000",
+              fontWeight: 700,
+              fontSize: "1.1rem",
+              padding: "8px 16px",
+              boxShadow: "0 0 20px rgba(0, 212, 255, 0.5)",
+            }}
+          />
+          {!isOnboardingComplete && (
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#b794f6",
+                mt: 2,
+                fontWeight: 600,
+                textShadow: "0 0 10px rgba(183, 148, 246, 0.6)",
+              }}
+            >
+              Complete Onboarding to unlock other categories
+            </Typography>
+          )}
+        </Box>
+
+        {/* Main Content */}
+        <Box sx={{ position: "relative", width: 500, height: 500, zIndex: 1 }}>
+          {/* Glow effect for active slice */}
+          {activeIndex !== null && !categories[activeIndex].locked && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "100%",
+                height: "100%",
+                transform: "translate(-50%, -50%)",
+                borderRadius: "50%",
+                boxShadow: `0 0 60px ${pieData[activeIndex].glow}`,
+                pointerEvents: "none",
+                transition: "all 0.3s ease",
+              }}
+            />
+          )}
+
+          <PieChart width={500} height={500}>
+            <Pie
+              data={pieData}
+              dataKey="value"
+              cx="50%"
+              cy="50%"
+              innerRadius={130}
+              outerRadius={200}
+              startAngle={90}
+              endAngle={-270}
+              paddingAngle={3}
+              onClick={(_, idx: number) => handleCategoryClick(categories[idx])}
+              isAnimationActive={false}
+              onMouseEnter={(_, idx: number) => setActiveIndex(idx)}
+              onMouseLeave={() => setActiveIndex(null)}
+            >
+              {pieData.map((entry, idx) => (
+                <Cell
+                  key={`cell-${idx}`}
+                  fill={entry.color}
+                  style={{
+                    cursor: entry.locked ? "not-allowed" : "pointer",
+                    filter: entry.locked 
+                      ? "brightness(0.5)" 
+                      : activeIndex === idx 
+                      ? `drop-shadow(0 0 10px ${entry.color}) brightness(1.3)` 
+                      : "brightness(1)",
+                    transition: "all 0.3s ease-in-out",
+                    opacity: entry.locked ? 0.4 : 1,
+                  }}
+                  stroke="#000"
+                  strokeWidth={2}
+                />
+              ))}
+              <Label
+                value={`${score} / ${max}`}
+                position="center"
+                style={{
+                  fontSize: 48,
+                  fontWeight: "bold",
+                  fill: "#fff",
+                  textShadow: "0 0 10px rgba(255,255,255,0.8)",
+                }}
+              />
+            </Pie>
+          </PieChart>
+
+          {/* Category labels with cards */}
+          {pieData.map((cat, idx) => {
+            const { x, y } = getLabelPosition(idx);
+            const categoryInfo = categories[idx];
+            return (
+              <Card
+                key={cat.name}
+                onClick={() => handleCategoryClick(categoryInfo)}
+                sx={{
+                  position: "absolute",
+                  left: x - 60,
+                  top: y - 30,
+                  width: 120,
+                  p: 1.5,
+                  textAlign: "center",
+                  background: categoryInfo.locked ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.8)",
+                  backdropFilter: "blur(10px)",
+                  border: `2px solid ${cat.color}`,
+                  borderRadius: 2,
+                  cursor: categoryInfo.locked ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  boxShadow: activeIndex === idx && !categoryInfo.locked
+                    ? `0 0 20px ${cat.glow}` 
+                    : `0 0 10px ${cat.glow}`,
+                  transform: activeIndex === idx && !categoryInfo.locked ? "scale(1.1)" : "scale(1)",
+                  opacity: categoryInfo.locked ? 0.5 : 1,
+                  "&:hover": categoryInfo.locked ? {} : {
+                    transform: "scale(1.15)",
+                    boxShadow: `0 0 30px ${cat.glow}`,
+                  },
+                }}
+              >
+                {categoryInfo.locked && (
+                  <LockIcon
+                    sx={{
+                      position: "absolute",
+                      top: -10,
+                      right: -10,
+                      fontSize: 20,
+                      color: "#999",
+                      backgroundColor: "#000",
+                      borderRadius: "50%",
+                      p: 0.5,
+                    }}
+                  />
+                )}
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: cat.color,
+                    fontWeight: "bold",
+                    mb: 0.5,
+                    textShadow: `0 0 10px ${cat.glow}`,
+                  }}
+                >
+                  {cat.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "#fff",
+                    fontWeight: 600,
+                  }}
+                >
+                  {categoryInfo.value} / {categoryInfo.max}
+                </Typography>
+              </Card>
+            );
+          })}
+        </Box>
+
+        {/* Instructions */}
+        <Box sx={{ mt: 6, textAlign: "center", position: "relative", zIndex: 1 }}>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "rgba(255, 255, 255, 0.7)",
+              fontSize: "1.1rem",
+              animation: "pulse 2s ease-in-out infinite",
+              "@keyframes pulse": {
+                "0%, 100%": { opacity: 0.7 },
+                "50%": { opacity: 1 },
+              },
+            }}
+          >
+            {isOnboardingComplete ? "Click on a category to view skill tree" : "Start with Onboarding to unlock other categories"}
+          </Typography>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }

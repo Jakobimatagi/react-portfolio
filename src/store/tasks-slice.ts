@@ -1,9 +1,8 @@
-// tasks-slice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { generateMockData } from "../utils/task-generator";
-import { Task } from "../utils/task-generator";
+import { generateMockData, Task, isOnboardingComplete } from "../utils/task-generator";
 
 interface TasksState {
+  onboarding: Task[];
   frontend: Task[];
   backend: Task[];
   devops: Task[];
@@ -17,29 +16,28 @@ const tasksSlice = createSlice({
   reducers: {
     completeTask: (state, action: PayloadAction<number>) => {
       const taskId = action.payload;
+      
       // Find and complete the task in any category
-      Object.keys(state).forEach((category) => {
-        const task = state[category as keyof TasksState].find(
-          (t) => t.id === taskId
-        );
+      for (const category of ["onboarding", "frontend", "backend", "devops"] as const) {
+        const task = state[category].find((t) => t.id === taskId);
         if (task) {
           task.completed = true;
+          break;
         }
-      });
+      }
     },
-    resetTasks: (state) => {
-      // Reset all tasks to incomplete (except first ones in each category)
-      Object.keys(state).forEach((category) => {
-        state[category as keyof TasksState].forEach((task) => {
-          task.completed = false;
-        });
-      });
-    },
-    regenerateTasks: () => {
-      return generateMockData();
+    resetTasks: (state, action: PayloadAction<string | undefined>) => {
+      const category = action.payload;
+      const mockData = generateMockData();
+      
+      if (category && category in state) {
+        state[category as keyof TasksState] = mockData[category as keyof TasksState];
+      } else {
+        return mockData;
+      }
     },
   },
 });
 
-export const { completeTask, resetTasks, regenerateTasks } = tasksSlice.actions;
+export const { completeTask, resetTasks } = tasksSlice.actions;
 export default tasksSlice.reducer;
