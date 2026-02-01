@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Card, Chip, Button } from "@mui/material";
-import { PieChart, Pie, Cell, Label } from "recharts";
+import { Box, Typography, Card, Chip, Button, useMediaQuery, useTheme } from "@mui/material";
+import { PieChart, Pie, Cell, Label, ResponsiveContainer } from "recharts";
 import { useCategoryStats, useTaskStats, useIsOnboardingComplete } from "../../store/task-hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/index";
@@ -25,6 +25,10 @@ const categoryColors: Record<string, { bg: string; color: string; glow: string }
 
 export default function UserDashboard() {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -115,6 +119,10 @@ export default function UserDashboard() {
   const score = totalStats.completed;
   const max = totalStats.total;
 
+  const chartSize = isMobile ? 300 : isTablet ? 400 : 500;
+  const innerRadius = isMobile ? 80 : isTablet ? 100 : 130;
+  const outerRadius = isMobile ? 130 : isTablet ? 160 : 200;
+
   // Calculate label positions
   const getLabelPosition = (idx: number): LabelPosition => {
     const total = pieData.reduce((sum, d) => sum + d.value, 0) || 1;
@@ -124,16 +132,16 @@ export default function UserDashboard() {
       .reduce((sum, d) => sum + d.value, 0);
     const midAngle =
       startAngle - ((prevValues + pieData[idx].value / 2) / total) * 360;
-    const radius = 250;
+    const radius = isMobile ? 150 : isTablet ? 200 : 250;
     const rad = (midAngle * Math.PI) / 180;
-    const x = 250 + Math.cos(rad) * radius;
-    const y = 250 - Math.sin(rad) * radius;
+    const x = chartSize / 2 + Math.cos(rad) * radius;
+    const y = chartSize / 2 - Math.sin(rad) * radius;
     return { x, y };
   };
 
   const handleCategoryClick = (category: typeof categories[0]) => {
     if (category.locked) {
-      return; // Don't navigate if locked
+      return;
     }
     navigate("/skill-tree", {
       state: { 
@@ -159,6 +167,7 @@ export default function UserDashboard() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            p: { xs: 2, sm: 3 },
             "&::before": {
               content: '""',
               position: "absolute",
@@ -175,8 +184,8 @@ export default function UserDashboard() {
           <Card
             sx={{
               maxWidth: 600,
-              width: "90%",
-              p: 5,
+              width: "100%",
+              p: { xs: 3, sm: 4, md: 5 },
               position: "relative",
               zIndex: 1,
               background: "rgba(0, 0, 0, 0.9)",
@@ -188,14 +197,14 @@ export default function UserDashboard() {
           >
             <Box
               sx={{
-                mb: 3,
+                mb: { xs: 2, sm: 3 },
                 display: "flex",
                 justifyContent: "center",
               }}
             >
               <HelpOutlineIcon
                 sx={{
-                  fontSize: 80,
+                  fontSize: { xs: 60, sm: 70, md: 80 },
                   color: "#00d4ff",
                   filter: "drop-shadow(0 0 20px rgba(0, 212, 255, 0.8))",
                 }}
@@ -207,8 +216,9 @@ export default function UserDashboard() {
               sx={{
                 fontWeight: "bold",
                 color: "#00d4ff",
-                mb: 2,
+                mb: { xs: 1, sm: 2 },
                 textShadow: "0 0 20px rgba(0, 212, 255, 0.6)",
+                fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
               }}
             >
               Welcome!
@@ -218,8 +228,9 @@ export default function UserDashboard() {
               variant="h5"
               sx={{
                 color: "#ccc",
-                mb: 4,
+                mb: { xs: 3, sm: 4 },
                 lineHeight: 1.6,
+                fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
               }}
             >
               Is this your first time using the Skill Dashboard?
@@ -228,23 +239,24 @@ export default function UserDashboard() {
             <Box
               sx={{
                 display: "flex",
-                gap: 3,
+                gap: { xs: 2, sm: 3 },
                 justifyContent: "center",
-                flexWrap: "wrap",
+                flexDirection: { xs: "column", sm: "row" },
               }}
             >
               <Button
                 onClick={handleFirstTimeYes}
                 variant="contained"
                 startIcon={<CheckCircleIcon />}
+                fullWidth={isMobile}
                 sx={{
                   backgroundColor: "#00ff88",
                   color: "#000",
                   textTransform: "none",
-                  fontSize: "1.2rem",
+                  fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
                   fontWeight: "bold",
-                  px: 5,
-                  py: 2,
+                  px: { xs: 3, sm: 4, md: 5 },
+                  py: { xs: 1.5, sm: 2 },
                   boxShadow: "0 0 20px rgba(0, 255, 136, 0.5)",
                   "&:hover": {
                     backgroundColor: "#00cc6a",
@@ -261,14 +273,15 @@ export default function UserDashboard() {
                 onClick={handleFirstTimeNo}
                 variant="outlined"
                 startIcon={<CancelIcon />}
+                fullWidth={isMobile}
                 sx={{
                   borderColor: "#00d4ff",
                   color: "#00d4ff",
                   textTransform: "none",
-                  fontSize: "1.2rem",
+                  fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
                   fontWeight: "bold",
-                  px: 5,
-                  py: 2,
+                  px: { xs: 3, sm: 4, md: 5 },
+                  py: { xs: 1.5, sm: 2 },
                   borderWidth: 2,
                   "&:hover": {
                     borderColor: "#00b8e6",
@@ -300,6 +313,7 @@ export default function UserDashboard() {
           alignItems: "center",
           position: "relative",
           overflow: "hidden",
+          p: { xs: 2, sm: 3 },
           "&::before": {
             content: '""',
             position: "absolute",
@@ -314,15 +328,16 @@ export default function UserDashboard() {
         }}
       >
         {/* Header */}
-        <Box sx={{ mb: 4, textAlign: "center", position: "relative", zIndex: 1 }}>
+        <Box sx={{ mb: { xs: 2, sm: 3, md: 4 }, textAlign: "center", position: "relative", zIndex: 1 }}>
           <Typography
             variant="h2"
             sx={{
               fontWeight: "bold",
               color: "#00d4ff",
-              mb: 2,
+              mb: { xs: 1, sm: 2 },
               textShadow: "0 0 20px rgba(0, 212, 255, 0.8)",
-              letterSpacing: "3px",
+              letterSpacing: { xs: "1px", sm: "2px", md: "3px" },
+              fontSize: { xs: "1.5rem", sm: "2.5rem", md: "3.75rem" },
             }}
           >
             SKILL DASHBOARD
@@ -333,8 +348,8 @@ export default function UserDashboard() {
               backgroundColor: "#00d4ff",
               color: "#000",
               fontWeight: 700,
-              fontSize: "1.1rem",
-              padding: "8px 16px",
+              fontSize: { xs: "0.875rem", sm: "1rem", md: "1.1rem" },
+              padding: { xs: "6px 12px", sm: "8px 16px" },
               boxShadow: "0 0 20px rgba(0, 212, 255, 0.5)",
             }}
           />
@@ -343,9 +358,11 @@ export default function UserDashboard() {
               variant="body1"
               sx={{
                 color: "#b794f6",
-                mt: 2,
+                mt: { xs: 1, sm: 2 },
                 fontWeight: 600,
                 textShadow: "0 0 10px rgba(183, 148, 246, 0.6)",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                px: 2,
               }}
             >
               Complete Onboarding to unlock other categories
@@ -354,7 +371,13 @@ export default function UserDashboard() {
         </Box>
 
         {/* Main Content */}
-        <Box sx={{ position: "relative", width: 500, height: 500, zIndex: 1 }}>
+        <Box sx={{ 
+          position: "relative", 
+          width: { xs: 300, sm: 400, md: 500 }, 
+          height: { xs: 300, sm: 400, md: 500 }, 
+          zIndex: 1,
+          mb: { xs: 2, sm: 0 }
+        }}>
           {/* Glow effect for active slice */}
           {activeIndex !== null && !categories[activeIndex].locked && (
             <Box
@@ -366,21 +389,21 @@ export default function UserDashboard() {
                 height: "100%",
                 transform: "translate(-50%, -50%)",
                 borderRadius: "50%",
-                boxShadow: `0 0 60px ${pieData[activeIndex].glow}`,
+                boxShadow: `0 0 ${isMobile ? "40px" : "60px"} ${pieData[activeIndex].glow}`,
                 pointerEvents: "none",
                 transition: "all 0.3s ease",
               }}
             />
           )}
 
-          <PieChart width={500} height={500}>
+          <PieChart width={chartSize} height={chartSize}>
             <Pie
               data={pieData}
               dataKey="value"
               cx="50%"
               cy="50%"
-              innerRadius={130}
-              outerRadius={200}
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
               startAngle={90}
               endAngle={-270}
               paddingAngle={3}
@@ -411,7 +434,7 @@ export default function UserDashboard() {
                 value={`${score} / ${max}`}
                 position="center"
                 style={{
-                  fontSize: 48,
+                  fontSize: isMobile ? 32 : isTablet ? 40 : 48,
                   fontWeight: "bold",
                   fill: "#fff",
                   textShadow: "0 0 10px rgba(255,255,255,0.8)",
@@ -421,7 +444,7 @@ export default function UserDashboard() {
           </PieChart>
 
           {/* Category labels with cards */}
-          {pieData.map((cat, idx) => {
+          {!isMobile && pieData.map((cat, idx) => {
             const { x, y } = getLabelPosition(idx);
             const categoryInfo = categories[idx];
             return (
@@ -430,10 +453,10 @@ export default function UserDashboard() {
                 onClick={() => handleCategoryClick(categoryInfo)}
                 sx={{
                   position: "absolute",
-                  left: x - 60,
+                  left: x - (isTablet ? 50 : 60),
                   top: y - 30,
-                  width: 120,
-                  p: 1.5,
+                  width: isTablet ? 100 : 120,
+                  p: { xs: 1, sm: 1.5 },
                   textAlign: "center",
                   background: categoryInfo.locked ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.8)",
                   backdropFilter: "blur(10px)",
@@ -458,11 +481,80 @@ export default function UserDashboard() {
                       position: "absolute",
                       top: -10,
                       right: -10,
-                      fontSize: 20,
+                      fontSize: { xs: 16, sm: 20 },
                       color: "#999",
                       backgroundColor: "#000",
                       borderRadius: "50%",
                       p: 0.5,
+                    }}
+                  />
+                )}
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: cat.color,
+                    fontWeight: "bold",
+                    mb: 0.5,
+                    textShadow: `0 0 10px ${cat.glow}`,
+                    fontSize: { xs: "0.875rem", sm: "1rem", md: "1.25rem" },
+                  }}
+                >
+                  {cat.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "#fff",
+                    fontWeight: 600,
+                    fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                  }}
+                >
+                  {categoryInfo.value} / {categoryInfo.max}
+                </Typography>
+              </Card>
+            );
+          })}
+        </Box>
+
+        {/* Mobile Category List */}
+        {isMobile && (
+          <Box sx={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 2, 
+            width: "100%", 
+            maxWidth: 400,
+            mt: 3,
+            zIndex: 1 
+          }}>
+            {categories.map((cat, idx) => (
+              <Card
+                key={cat.name}
+                onClick={() => handleCategoryClick(cat)}
+                sx={{
+                  p: 2,
+                  background: cat.locked ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.8)",
+                  backdropFilter: "blur(10px)",
+                  border: `2px solid ${cat.color}`,
+                  borderRadius: 2,
+                  cursor: cat.locked ? "not-allowed" : "pointer",
+                  opacity: cat.locked ? 0.5 : 1,
+                  position: "relative",
+                  transition: "all 0.3s ease",
+                  "&:active": !cat.locked ? {
+                    transform: "scale(0.98)",
+                    boxShadow: `0 0 20px ${cat.glow}`,
+                  } : {},
+                }}
+              >
+                {cat.locked && (
+                  <LockIcon
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      fontSize: 20,
+                      color: "#999",
                     }}
                   />
                 )}
@@ -484,20 +576,20 @@ export default function UserDashboard() {
                     fontWeight: 600,
                   }}
                 >
-                  {categoryInfo.value} / {categoryInfo.max}
+                  {cat.value} / {cat.max} Complete
                 </Typography>
               </Card>
-            );
-          })}
-        </Box>
+            ))}
+          </Box>
+        )}
 
         {/* Instructions */}
-        <Box sx={{ mt: 6, textAlign: "center", position: "relative", zIndex: 1 }}>
+        <Box sx={{ mt: { xs: 3, sm: 4, md: 6 }, textAlign: "center", position: "relative", zIndex: 1, px: 2 }}>
           <Typography
             variant="body1"
             sx={{
               color: "rgba(255, 255, 255, 0.7)",
-              fontSize: "1.1rem",
+              fontSize: { xs: "0.875rem", sm: "1rem", md: "1.1rem" },
               animation: "pulse 2s ease-in-out infinite",
               "@keyframes pulse": {
                 "0%, 100%": { opacity: 0.7 },
