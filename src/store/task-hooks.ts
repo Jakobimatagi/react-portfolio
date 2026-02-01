@@ -1,44 +1,32 @@
-// task-hooks.ts
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "./index";
-import { completeTask, resetTasks } from "./tasks-slice";
-import { getAllTasks, getCompletedCount, getTotalCount } from "../utils/task-generator";
+import { useSelector } from "react-redux";
+import { RootState } from "./index";
+import { isOnboardingComplete } from "../utils/task-generator";
 
-export function useAllTasks() {
+export function useCategoryStats(category: "onboarding" | "frontend" | "backend" | "devops") {
   return useSelector((state: RootState) => {
-    const tasks = state.tasks;
-    return getAllTasks(tasks);
+    const tasks = state.tasks[category];
+    const completed = tasks.filter((t) => t.completed).length;
+    const total = tasks.length;
+    return { completed, total };
   });
-}
-
-export function useCategoryTasks(category: "frontend" | "backend" | "devops") {
-  return useSelector((state: RootState) => state.tasks[category]);
 }
 
 export function useTaskStats() {
   return useSelector((state: RootState) => {
-    const allTasks = getAllTasks(state.tasks);
-    return {
-      completed: getCompletedCount(allTasks),
-      total: getTotalCount(allTasks),
-    };
+    const allTasks = [
+      ...state.tasks.onboarding,
+      ...state.tasks.frontend,
+      ...state.tasks.backend,
+      ...state.tasks.devops,
+    ];
+    const completed = allTasks.filter((t) => t.completed).length;
+    const total = allTasks.length;
+    return { completed, total };
   });
 }
 
-export function useCategoryStats(category: "frontend" | "backend" | "devops") {
+export function useIsOnboardingComplete() {
   return useSelector((state: RootState) => {
-    const tasks = state.tasks[category];
-    return {
-      completed: getCompletedCount(tasks),
-      total: getTotalCount(tasks),
-    };
+    return isOnboardingComplete(state.tasks.onboarding);
   });
-}
-
-export function useTaskActions() {
-  const dispatch = useDispatch<AppDispatch>();
-  return {
-    completeTask: (taskId: number) => dispatch(completeTask(taskId)),
-    resetTasks: () => dispatch(resetTasks()),
-  };
 }
