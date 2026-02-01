@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Button, Typography, Card, LinearProgress, Chip } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import TaskNode from "./task-node";
 import { buildTree, isUnlocked } from "./skil-tree-interface";
 import { useSelector, useDispatch } from "react-redux";
 import { completeTask, resetTasks } from "../../store/tasks-slice";
@@ -26,7 +25,6 @@ function renderTree(
   level: number = 0,
   colors: { bg: string; color: string }
 ): React.ReactNode {
-  const columns = 3; // Number of columns to display nodes horizontally
   
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 4, position: "relative" }}>

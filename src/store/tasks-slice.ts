@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { generateMockData, Task, isOnboardingComplete } from "../utils/task-generator";
+import { generateMockData, Task } from "../utils/task-generator";
 
 interface TasksState {
   onboarding: Task[];
