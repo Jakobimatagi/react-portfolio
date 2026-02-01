@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, Typography, Card, Stepper, Step, StepLabel } from "@mui/material";
+import { Box, Button, Typography, Card, Stepper, Step, StepLabel, useMediaQuery, useTheme } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
@@ -33,6 +33,9 @@ const steps = [
 
 export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
   const [activeStep, setActiveStep] = useState(0);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
@@ -63,6 +66,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        p: { xs: 2, sm: 3 },
         "&::before": {
           content: '""',
           position: "absolute",
@@ -79,8 +83,8 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
       <Card
         sx={{
           maxWidth: 700,
-          width: "90%",
-          p: 4,
+          width: "100%",
+          p: { xs: 2, sm: 3, md: 4 },
           position: "relative",
           zIndex: 1,
           background: "rgba(0, 0, 0, 0.9)",
@@ -94,26 +98,41 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
           onClick={handleSkip}
           sx={{
             position: "absolute",
-            top: 16,
-            right: 16,
+            top: { xs: 8, sm: 16 },
+            right: { xs: 8, sm: 16 },
             color: "#999",
             textTransform: "none",
+            fontSize: { xs: "0.875rem", sm: "1rem" },
+            minWidth: "auto",
+            p: { xs: 1, sm: 1.5 },
             "&:hover": {
               color: "#00d4ff",
             },
           }}
         >
-          Skip Tutorial
+          Skip
         </Button>
 
         {/* Stepper */}
-        <Stepper activeStep={activeStep} sx={{ mb: 4, mt: 2 }}>
+        <Stepper 
+          activeStep={activeStep} 
+          sx={{ 
+            mb: { xs: 2, sm: 3, md: 4 }, 
+            mt: { xs: 4, sm: 2 },
+            "& .MuiStepConnector-line": {
+              display: { xs: "none", sm: "block" }
+            }
+          }}
+          orientation={isMobile ? "vertical" : "horizontal"}
+        >
           {steps.map((step, index) => (
             <Step key={index}>
               <StepLabel
                 sx={{
                   "& .MuiStepLabel-label": {
                     color: "#999",
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    display: { xs: "none", sm: "block" }
                   },
                   "& .MuiStepLabel-label.Mui-active": {
                     color: "#00d4ff",
@@ -123,6 +142,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                   },
                   "& .MuiStepIcon-root": {
                     color: "#333",
+                    fontSize: { xs: "1.5rem", sm: "2rem" }
                   },
                   "& .MuiStepIcon-root.Mui-active": {
                     color: "#00d4ff",
@@ -137,12 +157,12 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         </Stepper>
 
         {/* Content */}
-        <Box sx={{ textAlign: "center", py: 4 }}>
+        <Box sx={{ textAlign: "center", py: { xs: 2, sm: 3, md: 4 } }}>
           <Typography
             variant="h1"
             sx={{
-              fontSize: "5rem",
-              mb: 3,
+              fontSize: { xs: "3rem", sm: "4rem", md: "5rem" },
+              mb: { xs: 2, sm: 3 },
             }}
           >
             {steps[activeStep].image}
@@ -152,8 +172,9 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             sx={{
               fontWeight: "bold",
               color: "#00d4ff",
-              mb: 2,
+              mb: { xs: 1, sm: 2 },
               textShadow: "0 0 20px rgba(0, 212, 255, 0.6)",
+              fontSize: { xs: "1.25rem", sm: "1.75rem", md: "2.125rem" },
             }}
           >
             {steps[activeStep].title}
@@ -162,10 +183,11 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             variant="body1"
             sx={{
               color: "#ccc",
-              fontSize: "1.1rem",
+              fontSize: { xs: "0.875rem", sm: "1rem", md: "1.1rem" },
               lineHeight: 1.8,
               maxWidth: 500,
               mx: "auto",
+              px: { xs: 1, sm: 2 },
             }}
           >
             {steps[activeStep].description}
@@ -173,15 +195,22 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         </Box>
 
         {/* Navigation Buttons */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+        <Box sx={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          mt: { xs: 2, sm: 3, md: 4 },
+          flexDirection: { xs: "column", sm: "row" },
+          gap: { xs: 2, sm: 0 }
+        }}>
           <Button
             onClick={handleBack}
             disabled={activeStep === 0}
-            startIcon={<ArrowBackIcon />}
+            startIcon={!isMobile && <ArrowBackIcon />}
             sx={{
               color: activeStep === 0 ? "#333" : "#00d4ff",
               textTransform: "none",
-              fontSize: "1rem",
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+              order: { xs: 2, sm: 1 },
               "&:hover": {
                 backgroundColor: "rgba(0, 212, 255, 0.1)",
               },
@@ -192,16 +221,19 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
 
           <Button
             onClick={handleNext}
-            endIcon={activeStep === steps.length - 1 ? <RocketLaunchIcon /> : <ArrowForwardIcon />}
+            endIcon={!isMobile && (activeStep === steps.length - 1 ? <RocketLaunchIcon /> : <ArrowForwardIcon />)}
             variant="contained"
+            fullWidth={isMobile}
             sx={{
               backgroundColor: "#00d4ff",
               color: "#000",
               textTransform: "none",
-              fontSize: "1rem",
+              fontSize: { xs: "0.875rem", sm: "1rem" },
               fontWeight: "bold",
-              px: 4,
+              px: { xs: 3, sm: 4 },
+              py: { xs: 1.5, sm: 1 },
               boxShadow: "0 0 20px rgba(0, 212, 255, 0.5)",
+              order: { xs: 1, sm: 2 },
               "&:hover": {
                 backgroundColor: "#00b8e6",
                 boxShadow: "0 0 30px rgba(0, 212, 255, 0.7)",
@@ -213,13 +245,19 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         </Box>
 
         {/* Progress Indicator */}
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 3 }}>
+        <Box sx={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          gap: 1, 
+          mt: { xs: 2, sm: 3 },
+          order: { xs: 3, sm: 3 }
+        }}>
           {steps.map((_, index) => (
             <Box
               key={index}
               sx={{
-                width: 8,
-                height: 8,
+                width: { xs: 6, sm: 8 },
+                height: { xs: 6, sm: 8 },
                 borderRadius: "50%",
                 backgroundColor: index === activeStep ? "#00d4ff" : "#333",
                 transition: "all 0.3s ease",
