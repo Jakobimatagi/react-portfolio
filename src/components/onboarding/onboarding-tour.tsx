@@ -10,7 +10,7 @@ interface OnboardingTourProps {
 
 const steps = [
   {
-    title: "Welcome to Your Skill Tree",
+    title: "Welcome to Your Investment Journey",
     description: "Track your progress and launch a fund.",
     image: "💰",
   },
