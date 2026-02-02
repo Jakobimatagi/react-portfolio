@@ -213,10 +213,10 @@ export default function UserDashboard() {
               p: { xs: 3, sm: 4, md: 5 },
               position: "relative",
               zIndex: 1,
-              background: "rgba(0, 0, 0, 0.9)",
-              backdropFilter: "blur(20px)",
+              background: "#ffffff",
+              backdropFilter: "none",
               border: "2px solid #fbbf24",
-              boxShadow: "0 0 20px rgba(251, 191, 36, 0.2)",
+              boxShadow: "0 4px 24px rgba(0, 0, 0, 0.1)",
               textAlign: "center",
             }}
           >
