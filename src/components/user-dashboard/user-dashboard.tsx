@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Card, Chip, Button, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  Chip,
+  Button,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { PieChart, Pie, Cell, Label } from "recharts";
-import { useCategoryStats, useTaskStats, useIsInitialTasksComplete } from "../../store/task-hooks";
+import {
+  useCategoryStats,
+  useTaskStats,
+  useIsInitialTasksComplete,
+} from "../../store/task-hooks";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/index";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
@@ -16,19 +28,34 @@ interface LabelPosition {
   y: number;
 }
 
-const categoryColors: Record<string, { bg: string; color: string; glow: string }> = {
-  initialTasks: { bg: "#2d2d2d", color: "#6b7280", glow: "rgba(107, 114, 128, 0.3)" },
+const categoryColors: Record<
+  string,
+  { bg: string; color: string; glow: string }
+> = {
+  initialTasks: {
+    bg: "#2d2d2d",
+    color: "#6b7280",
+    glow: "rgba(107, 114, 128, 0.3)",
+  },
   sfr: { bg: "#2d2d2d", color: "#3b82f6", glow: "rgba(59, 130, 246, 0.3)" },
-  commercial: { bg: "#2d2d2d", color: "#10b981", glow: "rgba(16, 185, 129, 0.3)" },
-  specialty: { bg: "#2d2d2d", color: "#8b5cf6", glow: "rgba(139, 92, 246, 0.3)" },
+  commercial: {
+    bg: "#2d2d2d",
+    color: "#10b981",
+    glow: "rgba(16, 185, 129, 0.3)",
+  },
+  specialty: {
+    bg: "#2d2d2d",
+    color: "#8b5cf6",
+    glow: "rgba(139, 92, 246, 0.3)",
+  },
 };
 
 export default function UserDashboard() {
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -41,7 +68,7 @@ export default function UserDashboard() {
       return;
     }
   }, [navigate]);
-  
+
   // Get task data from Redux
   const tasks = useSelector((state: RootState) => state.tasks);
   const initialTasksStats = useCategoryStats("initialTasks");
@@ -50,10 +77,6 @@ export default function UserDashboard() {
   const specialtyStats = useCategoryStats("specialty");
   const totalStats = useTaskStats();
   const isInitialTasksComplete = useIsInitialTasksComplete();
-
-  // Check if a fund has been selected (fund categories should unlock immediately)
-  const selectedFundType = localStorage.getItem("selectedFundType") as "sfr" | "commercial" | "specialty" | null;
-  const hasSelectedFund = !!selectedFundType;
 
   // Check if first visit
   useEffect(() => {
@@ -152,14 +175,14 @@ export default function UserDashboard() {
     return { x, y };
   };
 
-  const handleCategoryClick = (category: typeof categories[0]) => {
+  const handleCategoryClick = (category: (typeof categories)[0]) => {
     if (category.locked) {
       return;
     }
     navigate("/skill-tree", {
-      state: { 
+      state: {
         taskData: category.taskData,
-        category: category.category
+        category: category.category,
       },
     });
   };
@@ -302,7 +325,9 @@ export default function UserDashboard() {
       )}
 
       {/* Onboarding Tour */}
-      {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
+      {showOnboarding && (
+        <OnboardingTour onComplete={handleOnboardingComplete} />
+      )}
 
       {/* Main Dashboard */}
       <Box
@@ -319,7 +344,14 @@ export default function UserDashboard() {
         }}
       >
         {/* Header */}
-        <Box sx={{ mb: { xs: 2, sm: 3, md: 4 }, textAlign: "center", position: "relative", zIndex: 1 }}>
+        <Box
+          sx={{
+            mb: { xs: 2, sm: 3, md: 4 },
+            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           <Typography
             variant="h2"
             sx={{
@@ -362,13 +394,15 @@ export default function UserDashboard() {
         </Box>
 
         {/* Main Content */}
-        <Box sx={{ 
-          position: "relative", 
-          width: { xs: 300, sm: 400, md: 500 }, 
-          height: { xs: 300, sm: 400, md: 500 }, 
-          zIndex: 1,
-          mb: { xs: 2, sm: 0 }
-        }}>
+        <Box
+          sx={{
+            position: "relative",
+            width: { xs: 300, sm: 400, md: 500 },
+            height: { xs: 300, sm: 400, md: 500 },
+            zIndex: 1,
+            mb: { xs: 2, sm: 0 },
+          }}
+        >
           {activeIndex !== null && !categories[activeIndex].locked && (
             <Box
               sx={{
@@ -409,11 +443,11 @@ export default function UserDashboard() {
                   fill={entry.color}
                   style={{
                     cursor: entry.locked ? "not-allowed" : "pointer",
-                    filter: entry.locked 
-                      ? "brightness(0.6) saturate(0.5)" 
-                      : activeIndex === idx 
-                      ? "brightness(1.15)" 
-                      : "brightness(0.95)",
+                    filter: entry.locked
+                      ? "brightness(0.6) saturate(0.5)"
+                      : activeIndex === idx
+                        ? "brightness(1.15)"
+                        : "brightness(0.95)",
                     transition: "all 0.3s ease-in-out",
                     opacity: entry.locked ? 0.3 : 1,
                   }}
@@ -435,111 +469,136 @@ export default function UserDashboard() {
           </PieChart>
 
           {/* Category labels with cards */}
-          {!isMobile && pieData.map((cat, idx) => {
-            const { x, y } = getLabelPosition(idx);
-            const categoryInfo = categories[idx];
-            return (
-              <Card
-                key={cat.name}
-                onClick={() => handleCategoryClick(categoryInfo)}
-                sx={{
-                  position: "absolute",
-                  left: x - (isTablet ? 50 : 60),
-                  top: y - 30,
-                  width: isTablet ? 100 : 120,
-                  p: { xs: 1, sm: 1.5 },
-                  textAlign: "center",
-                  background: categoryInfo.locked ? "rgba(200, 200, 200, 0.9)" : "rgba(0, 0, 0, 0.8)",
-                  backdropFilter: "blur(10px)",
-                  border: categoryInfo.locked ? "2px solid #cccccc" : `2px solid ${cat.color}`,
-                  borderRadius: 2,
-                  cursor: categoryInfo.locked ? "not-allowed" : "pointer",
-                  transition: "all 0.3s ease",
-                  boxShadow: activeIndex === idx && !categoryInfo.locked
-                    ? `0 8px 24px ${cat.glow}, 0 0 0 3px ${cat.color}20` 
-                    : categoryInfo.locked ? "0 2px 8px rgba(0, 0, 0, 0.1)" : `0 4px 12px rgba(0, 0, 0, 0.15)`,
-                  transform: activeIndex === idx && !categoryInfo.locked ? "scale(1.1)" : "scale(1)",
-                  opacity: 1,
-                  "&:hover": categoryInfo.locked ? {} : {
-                    transform: "scale(1.15)",
-                    boxShadow: `0 12px 32px ${cat.glow}, 0 0 0 3px ${cat.color}30`,
-                    background: "rgba(0, 0, 0, 0.9)",
-                  },
-                }}
-              >
-                {categoryInfo.locked && (
-                  <LockIcon
+          {!isMobile &&
+            pieData.map((cat, idx) => {
+              const { x, y } = getLabelPosition(idx);
+              const categoryInfo = categories[idx];
+              return (
+                <Card
+                  key={cat.name}
+                  onClick={() => handleCategoryClick(categoryInfo)}
+                  sx={{
+                    position: "absolute",
+                    left: x - (isTablet ? 50 : 60),
+                    top: y - 30,
+                    width: isTablet ? 100 : 120,
+                    p: { xs: 1, sm: 1.5 },
+                    textAlign: "center",
+                    background: categoryInfo.locked
+                      ? "rgba(200, 200, 200, 0.9)"
+                      : "rgba(0, 0, 0, 0.8)",
+                    backdropFilter: "blur(10px)",
+                    border: categoryInfo.locked
+                      ? "2px solid #cccccc"
+                      : `2px solid ${cat.color}`,
+                    borderRadius: 2,
+                    cursor: categoryInfo.locked ? "not-allowed" : "pointer",
+                    transition: "all 0.3s ease",
+                    boxShadow:
+                      activeIndex === idx && !categoryInfo.locked
+                        ? `0 8px 24px ${cat.glow}, 0 0 0 3px ${cat.color}20`
+                        : categoryInfo.locked
+                          ? "0 2px 8px rgba(0, 0, 0, 0.1)"
+                          : `0 4px 12px rgba(0, 0, 0, 0.15)`,
+                    transform:
+                      activeIndex === idx && !categoryInfo.locked
+                        ? "scale(1.1)"
+                        : "scale(1)",
+                    opacity: 1,
+                    "&:hover": categoryInfo.locked
+                      ? {}
+                      : {
+                          transform: "scale(1.15)",
+                          boxShadow: `0 12px 32px ${cat.glow}, 0 0 0 3px ${cat.color}30`,
+                          background: "rgba(0, 0, 0, 0.9)",
+                        },
+                  }}
+                >
+                  {categoryInfo.locked && (
+                    <LockIcon
+                      sx={{
+                        position: "absolute",
+                        top: -10,
+                        right: -10,
+                        fontSize: { xs: 16, sm: 20 },
+                        color: "#666666",
+                        backgroundColor: "#f0f0f0",
+                        borderRadius: "50%",
+                        p: 0.5,
+                        border: "2px solid #cccccc",
+                      }}
+                    />
+                  )}
+                  <Typography
+                    variant="h6"
                     sx={{
-                      position: "absolute",
-                      top: -10,
-                      right: -10,
-                      fontSize: { xs: 16, sm: 20 },
-                      color: "#666666",
-                      backgroundColor: "#f0f0f0",
-                      borderRadius: "50%",
-                      p: 0.5,
-                      border: "2px solid #cccccc",
+                      color: categoryInfo.locked ? "#999999" : cat.color,
+                      fontWeight: "bold",
+                      mb: 0.5,
+                      textShadow: categoryInfo.locked
+                        ? "none"
+                        : `0 0 10px ${cat.glow}`,
+                      fontSize: { xs: "0.875rem", sm: "1rem", md: "1.25rem" },
                     }}
-                  />
-                )}
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: categoryInfo.locked ? "#999999" : cat.color,
-                    fontWeight: "bold",
-                    mb: 0.5,
-                    textShadow: categoryInfo.locked ? "none" : `0 0 10px ${cat.glow}`,
-                    fontSize: { xs: "0.875rem", sm: "1rem", md: "1.25rem" },
-                  }}
-                >
-                  {cat.name}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#ffffff",
-                    fontWeight: 600,
-                    fontSize: { xs: "0.7rem", sm: "0.875rem" },
-                  }}
-                >
-                  {categoryInfo.value} / {categoryInfo.max}
-                </Typography>
-              </Card>
-            );
-          })}
+                  >
+                    {cat.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                    }}
+                  >
+                    {categoryInfo.value} / {categoryInfo.max}
+                  </Typography>
+                </Card>
+              );
+            })}
         </Box>
 
         {/* Mobile Category List */}
         {isMobile && (
-          <Box sx={{ 
-            display: "flex", 
-            flexDirection: "column", 
-            gap: 2, 
-            width: "100%", 
-            maxWidth: 400,
-            mt: 3,
-            zIndex: 1 
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              width: "100%",
+              maxWidth: 400,
+              mt: 3,
+              zIndex: 1,
+            }}
+          >
             {categories.map((cat, idx) => (
               <Card
                 key={cat.name}
                 onClick={() => handleCategoryClick(cat)}
                 sx={{
                   p: 2,
-                  background: cat.locked ? "rgba(200, 200, 200, 0.9)" : "rgba(0, 0, 0, 0.8)",
+                  background: cat.locked
+                    ? "rgba(200, 200, 200, 0.9)"
+                    : "rgba(0, 0, 0, 0.8)",
                   backdropFilter: "blur(10px)",
-                  border: cat.locked ? "2px solid #cccccc" : `2px solid ${cat.color}`,
+                  border: cat.locked
+                    ? "2px solid #cccccc"
+                    : `2px solid ${cat.color}`,
                   borderRadius: 2,
                   cursor: cat.locked ? "not-allowed" : "pointer",
                   opacity: 1,
                   position: "relative",
                   transition: "all 0.3s ease",
                   overflow: "visible",
-                  boxShadow: cat.locked ? "0 2px 8px rgba(0, 0, 0, 0.1)" : `0 4px 12px rgba(0, 0, 0, 0.15)`,
-                  "&:active": !cat.locked ? {
-                    transform: "scale(0.98)",
-                    boxShadow: `0 8px 24px ${cat.glow}, 0 0 0 3px ${cat.color}20`,
-                  } : {},
+                  boxShadow: cat.locked
+                    ? "0 2px 8px rgba(0, 0, 0, 0.1)"
+                    : `0 4px 12px rgba(0, 0, 0, 0.15)`,
+                  "&:active": !cat.locked
+                    ? {
+                        transform: "scale(0.98)",
+                        boxShadow: `0 8px 24px ${cat.glow}, 0 0 0 3px ${cat.color}20`,
+                      }
+                    : {},
                 }}
               >
                 {cat.locked && (
@@ -585,7 +644,15 @@ export default function UserDashboard() {
         )}
 
         {/* Instructions */}
-        <Box sx={{ mt: { xs: 3, sm: 4, md: 6 }, textAlign: "center", position: "relative", zIndex: 1, px: 2 }}>
+        <Box
+          sx={{
+            mt: { xs: 3, sm: 4, md: 6 },
+            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
+            px: 2,
+          }}
+        >
           <Typography
             variant="body1"
             sx={{
@@ -598,7 +665,9 @@ export default function UserDashboard() {
               },
             }}
           >
-            {isInitialTasksComplete ? "Click on a fund category to begin the launch process" : "Complete initial tasks to unlock fund categories"}
+            {isInitialTasksComplete
+              ? "Click on a fund category to begin the launch process"
+              : "Complete initial tasks to unlock fund categories"}
           </Typography>
         </Box>
       </Box>
