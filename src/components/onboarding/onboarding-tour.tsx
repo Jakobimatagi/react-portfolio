@@ -62,22 +62,11 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         right: 0,
         bottom: 0,
         zIndex: 9999,
-        background: "radial-gradient(ellipse at top, #1a1a2e, #000000)",
+        background: "rgba(247, 247, 247, 0.98)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         p: { xs: 2, sm: 3 },
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
-          backgroundSize: "50px 50px",
-          opacity: 0.3,
-        },
       }}
     >
       <Card
@@ -87,10 +76,10 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
           p: { xs: 2, sm: 3, md: 4 },
           position: "relative",
           zIndex: 1,
-          background: "rgba(0, 0, 0, 0.9)",
-          backdropFilter: "blur(20px)",
+          background: "#ffffff",
+          backdropFilter: "none",
           border: "2px solid #fbbf24",
-          boxShadow: "0 0 20px rgba(251, 191, 36, 0.2)",
+          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.1)",
         }}
       >
         {/* Skip Button */}
@@ -100,7 +89,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             position: "absolute",
             top: { xs: 8, sm: 16 },
             right: { xs: 8, sm: 16 },
-            color: "#999",
+            color: "#666666",
             textTransform: "none",
             fontSize: { xs: "0.875rem", sm: "1rem" },
             minWidth: "auto",
@@ -130,7 +119,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
               <StepLabel
                 sx={{
                   "& .MuiStepLabel-label": {
-                    color: "#999",
+                    color: "#666666",
                     fontSize: { xs: "0.75rem", sm: "0.875rem" },
                     display: { xs: "none", sm: "block" }
                   },
@@ -138,17 +127,17 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                     color: "#fbbf24",
                   },
                   "& .MuiStepLabel-label.Mui-completed": {
-                    color: "#6b9970",
+                    color: "#10b981",
                   },
                   "& .MuiStepIcon-root": {
-                    color: "#333",
+                    color: "#e5e7eb",
                     fontSize: { xs: "1.5rem", sm: "2rem" }
                   },
                   "& .MuiStepIcon-root.Mui-active": {
                     color: "#fbbf24",
                   },
                   "& .MuiStepIcon-root.Mui-completed": {
-                    color: "#6b9970",
+                    color: "#10b981",
                   },
                 }}
               />
@@ -171,9 +160,9 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             variant="h4"
             sx={{
               fontWeight: "bold",
-              color: "#fbbf24",
+              color: "#000000",
               mb: { xs: 1, sm: 2 },
-              textShadow: "0 0 10px rgba(251, 191, 36, 0.3)",
+              textShadow: "none",
               fontSize: { xs: "1.25rem", sm: "1.75rem", md: "2.125rem" },
             }}
           >
@@ -182,7 +171,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
           <Typography
             variant="body1"
             sx={{
-              color: "#ccc",
+              color: "#666666",
               fontSize: { xs: "0.875rem", sm: "1rem", md: "1.1rem" },
               lineHeight: 1.8,
               maxWidth: 500,
@@ -207,7 +196,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
             disabled={activeStep === 0}
             startIcon={!isMobile && <ArrowBackIcon />}
             sx={{
-              color: activeStep === 0 ? "#333" : "#fbbf24",
+              color: activeStep === 0 ? "#cccccc" : "#fbbf24",
               textTransform: "none",
               fontSize: { xs: "0.875rem", sm: "1rem" },
               order: { xs: 2, sm: 1 },
@@ -232,11 +221,11 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
               fontWeight: "bold",
               px: { xs: 3, sm: 4 },
               py: { xs: 1.5, sm: 1 },
-              boxShadow: "0 0 10px rgba(251, 191, 36, 0.3)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
               order: { xs: 1, sm: 2 },
               "&:hover": {
                 backgroundColor: "#d9a021",
-                boxShadow: "0 0 15px rgba(251, 191, 36, 0.4)",
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
               },
             }}
           >
@@ -259,9 +248,9 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
                 width: { xs: 6, sm: 8 },
                 height: { xs: 6, sm: 8 },
                 borderRadius: "50%",
-                backgroundColor: index === activeStep ? "#fbbf24" : "#333",
+                backgroundColor: index === activeStep ? "#fbbf24" : "#e5e7eb",
                 transition: "all 0.3s ease",
-                boxShadow: index === activeStep ? "0 0 10px rgba(251, 191, 36, 0.5)" : "none",
+                boxShadow: index === activeStep ? "0 2px 4px rgba(251, 191, 36, 0.4)" : "none",
               }}
             />
           ))}
