@@ -85,7 +85,7 @@ export default function FundSelection({ onSelectFund }: FundSelectionProps) {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)",
+        background: "white",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -167,14 +167,17 @@ export default function FundSelection({ onSelectFund }: FundSelectionProps) {
                 ? `3px solid ${fund.color}`
                 : "2px solid rgba(255, 255, 255, 0.1)",
               borderRadius: 3,
-              transition: "all 0.3s ease",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
               position: "relative",
               overflow: "hidden",
               minHeight: { xs: 280, sm: 320, md: 360 },
-              "&:hover": {
+              "&:hover": selectedFund !== fund.type ? {
                 transform: "translateY(-8px)",
                 boxShadow: `0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px ${fund.color}40`,
                 borderColor: fund.color,
+              } : {},
+              "&:active": {
+                transform: "translateY(-4px)",
               },
               "&::before": selectedFund === fund.type ? {
                 content: '""',
@@ -195,7 +198,6 @@ export default function FundSelection({ onSelectFund }: FundSelectionProps) {
                 justifyContent: "center",
                 mb: 3,
                 color: selectedFund === fund.type ? fund.color : "rgba(255, 255, 255, 0.7)",
-                transition: "all 0.3s ease",
               }}
             >
               {fund.icon}

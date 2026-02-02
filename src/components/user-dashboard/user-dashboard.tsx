@@ -34,8 +34,8 @@ const categoryColors: Record<
 > = {
   initialTasks: {
     bg: "#2d2d2d",
-    color: "#6b7280",
-    glow: "rgba(107, 114, 128, 0.3)",
+    color: "#ef4444",
+    glow: "rgba(239, 68, 68, 0.3)",
   },
   sfr: { bg: "#2d2d2d", color: "#3b82f6", glow: "rgba(59, 130, 246, 0.3)" },
   commercial: {
@@ -349,6 +349,8 @@ export default function UserDashboard() {
             mb: { xs: 2, sm: 3, md: 4 },
             textAlign: "center",
             position: "relative",
+            display: "flex",
+            flexDirection: "column",
             zIndex: 1,
           }}
         >
@@ -391,6 +393,30 @@ export default function UserDashboard() {
               Complete Onboarding to unlock other categories
             </Typography>
           )}
+          <Button
+            onClick={() => {
+              localStorage.removeItem('taskProgress');
+              localStorage.removeItem('selectedFundType');
+              localStorage.removeItem('hasVisitedDashboard');
+              navigate('/fund-selection');
+            }}
+            variant="outlined"
+            sx={{
+              mt: { xs: 2, sm: 3 },
+              color: "#666666",
+              borderColor: "#cccccc",
+              textTransform: "none",
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              px: { xs: 2, sm: 3 },
+              py: { xs: 0.75, sm: 1 },
+              "&:hover": {
+                borderColor: "#999999",
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+              },
+            }}
+          >
+            Start Fund Launch Over
+          </Button>
         </Box>
 
         {/* Main Content */}
@@ -461,7 +487,7 @@ export default function UserDashboard() {
                 style={{
                   fontSize: isMobile ? 32 : isTablet ? 40 : 48,
                   fontWeight: "bold",
-                  fill: "#fff",
+                  fill: "#000",
                   textShadow: "0 0 10px rgba(255,255,255,0.8)",
                 }}
               />
@@ -478,12 +504,18 @@ export default function UserDashboard() {
                   key={cat.name}
                   onClick={() => handleCategoryClick(categoryInfo)}
                   sx={{
+                    overflow: "visible",
                     position: "absolute",
                     left: x - (isTablet ? 50 : 60),
                     top: y - 30,
                     width: isTablet ? 100 : 120,
+                    minHeight: 60,
                     p: { xs: 1, sm: 1.5 },
                     textAlign: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
                     background: categoryInfo.locked
                       ? "rgba(200, 200, 200, 0.9)"
                       : "rgba(0, 0, 0, 0.8)",
@@ -505,12 +537,14 @@ export default function UserDashboard() {
                         ? "scale(1.1)"
                         : "scale(1)",
                     opacity: 1,
+                    zIndex: activeIndex === idx ? 10 : 5,
                     "&:hover": categoryInfo.locked
                       ? {}
                       : {
                           transform: "scale(1.15)",
                           boxShadow: `0 12px 32px ${cat.glow}, 0 0 0 3px ${cat.color}30`,
                           background: "rgba(0, 0, 0, 0.9)",
+                          zIndex: 10,
                         },
                   }}
                 >
@@ -539,6 +573,10 @@ export default function UserDashboard() {
                         ? "none"
                         : `0 0 10px ${cat.glow}`,
                       fontSize: { xs: "0.875rem", sm: "1rem", md: "1.25rem" },
+                      lineHeight: 1.2,
+                      overflow: "visible",
+                      whiteSpace: "normal",
+                      hyphens: "none",
                     }}
                   >
                     {cat.name}
@@ -549,6 +587,8 @@ export default function UserDashboard() {
                       color: "#ffffff",
                       fontWeight: 600,
                       fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                      overflow: "visible",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {categoryInfo.value} / {categoryInfo.max}
