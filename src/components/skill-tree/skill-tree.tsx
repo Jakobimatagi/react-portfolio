@@ -3,7 +3,7 @@ import { Box, Button, Typography, Card, LinearProgress, Chip, useMediaQuery, use
 import { useLocation, useNavigate } from "react-router-dom";
 import { buildTree, isUnlocked } from "./skil-tree-interface";
 import { useSelector, useDispatch } from "react-redux";
-import { completeTask, resetTasks } from "../../store/tasks-slice";
+import { completeTask } from "../../store/tasks-slice";
 import { RootState } from "../../store/index";
 import { Task as GeneratedTask } from "../../utils/task-generator";
 import LockIcon from "@mui/icons-material/Lock";
@@ -20,22 +20,15 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
-interface LocationState {
-  category?: string;
-}
-
-interface TreeNode {
-  id: string | number;
-  children?: TreeNode[];
-}
-
 function renderTree(
   nodes: TreeNode[],
   tasks: GeneratedTask[],
   handleTaskClick: (task: GeneratedTask) => void,
   level: number = 0,
   colors: { bg: string; color: string },
-  isMobile: boolean
+  isMobile: boolean,
+  category: string,
+  allInitialTasksComplete: boolean
 ): React.ReactNode {
   
   return (
@@ -48,7 +41,7 @@ function renderTree(
     }}>
       {nodes.map((node, idx) => {
         const task = tasks.find((t) => t.id === node.id);
-        const unlocked = isUnlocked(node, tasks);
+        const unlocked = isUnlocked(node, tasks, category, allInitialTasksComplete);
         const completed = task?.completed || false;
         
         return (
@@ -88,9 +81,13 @@ function renderTree(
                   ? "2px solid #e5e7eb"
                   : "2px dashed #cccccc",
                 borderRadius: 3,
-                minHeight: 140,
+                minHeight: { xs: 180, sm: 200 },
+                minWidth: { xs: 280, sm: 320 },
                 maxWidth: 400,
                 width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
                 transition: "all 0.3s ease",
                 opacity: unlocked ? 1 : 0.6,
                 transform: unlocked ? "scale(1)" : "scale(0.95)",
@@ -157,7 +154,7 @@ function renderTree(
               </Typography>
 
               {!unlocked && (
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
                   <Chip
                     label="Locked"
                     size="small"
@@ -200,7 +197,7 @@ function renderTree(
                   width: "100%",
                 }}
               >
-                {renderTree(node.children, tasks, handleTaskClick, level + 1, colors, isMobile)}
+                {renderTree(node.children, tasks, handleTaskClick, level + 1, colors, isMobile, category, allInitialTasksComplete)}
               </Box>
             )}
           </Box>
@@ -219,7 +216,7 @@ function getTotalScore(tasks: GeneratedTask[]): number {
 }
 
 const categoryColors: Record<string, { bg: string; color: string }> = {
-  initialTasks: { bg: "#2d2d2d", color: "#6b7280" },
+  initialTasks: { bg: "#2d2d2d", color: "#ef4444" },
   sfr: { bg: "#2d2d2d", color: "#3b82f6" },
   commercial: { bg: "#2d2d2d", color: "#10b981" },
   specialty: { bg: "#2d2d2d", color: "#8b5cf6" },
@@ -236,6 +233,8 @@ export default function SkillTree() {
   const category = state?.category || "sfr";
 
   const tasks = useSelector((state: RootState) => state.tasks[category as keyof typeof state.tasks]) || [];
+  const initialTasks = useSelector((state: RootState) => state.tasks.initialTasks) || [];
+  const allInitialTasksComplete = initialTasks.every(task => task.completed);
 
   const [showCompletion, setShowCompletion] = useState(false);
   const [currentTask, setCurrentTask] = useState<GeneratedTask | null>(null);
@@ -293,13 +292,12 @@ export default function SkillTree() {
     }
   };
 
-  const handleReset = (): void => {
-    dispatch(resetTasks(category));
-    setShowCompletion(false);
-  };
-
   const handleReturnToDashboard = () => {
     navigate('/user-dashboard');
+  };
+
+  const handleReset = () => {
+    setShowCompletion(false);
   };
 
   const tree = buildTree(tasks);
@@ -308,11 +306,16 @@ export default function SkillTree() {
   const progressPercentage = (completedScore / totalScore) * 100;
   const colors = categoryColors[category] || categoryColors.sfr;
 
+  // Format category name for display
+  const categoryDisplayName = category === 'initialTasks' 
+    ? 'Initial Tasks' 
+    : category.charAt(0).toUpperCase() + category.slice(1);
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        background: "#f7f7f7",
+        background: "#ffffff",
         py: { xs: 2, sm: 3, md: 4 },
         px: { xs: 1, sm: 2 },
         position: "relative",
@@ -348,12 +351,12 @@ export default function SkillTree() {
                   fontSize: { xs: "1.5rem", sm: "2rem", md: "3rem" },
                 }}
               >
-                {category.charAt(0).toUpperCase() + category.slice(1)} Skill Tree
+                {categoryDisplayName} Tasks
               </Typography>
               <Chip
                 label={`${completedScore} / ${totalScore} Complete`}
                 sx={{
-                  backgroundColor: "#fbbf24",
+                  backgroundColor: colors.color,
                   color: "#000",
                   fontWeight: 600,
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
@@ -383,7 +386,7 @@ export default function SkillTree() {
               <Typography 
                 variant="subtitle2" 
                 sx={{ 
-                  color: "#fbbf24", 
+                  color: colors.color, 
                   fontWeight: 600,
                   fontSize: { xs: "0.75rem", sm: "0.875rem" }
                 }}
@@ -400,7 +403,7 @@ export default function SkillTree() {
                 backgroundColor: "#e5e7eb",
                 "& .MuiLinearProgress-bar": {
                   borderRadius: 5,
-                  background: "#fbbf24",
+                  background: colors.color,
                   boxShadow: "none",
                 },
               }}
@@ -416,7 +419,7 @@ export default function SkillTree() {
             justifyContent: "center",
           }}
         >
-          {renderTree(tree, tasks, handleTaskClick, 0, colors, isMobile)}
+          {renderTree(tree, tasks, handleTaskClick, 0, colors, isMobile, category, allInitialTasksComplete)}
         </Box>
 
         {/* Return to Dashboard Button */}
@@ -424,6 +427,7 @@ export default function SkillTree() {
           sx={{
             display: "flex",
             justifyContent: "center",
+            gap: 2,
             mt: { xs: 3, sm: 4, md: 5 },
             mb: { xs: 2, sm: 3, md: 4 },
           }}
@@ -433,7 +437,7 @@ export default function SkillTree() {
             variant="contained"
             size="large"
             sx={{
-              backgroundColor: "#fbbf24",
+              backgroundColor: colors.color,
               color: "#000",
               textTransform: "none",
               fontSize: { xs: "1rem", sm: "1.1rem" },
@@ -442,7 +446,7 @@ export default function SkillTree() {
               py: { xs: 1.25, sm: 1.5 },
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
               "&:hover": {
-                backgroundColor: "#d9a021",
+                backgroundColor: colors.color,
                 boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
               },
             }}
@@ -461,6 +465,7 @@ export default function SkillTree() {
           title={currentTask.dialogConfig.title}
           fields={currentTask.dialogConfig.fields}
           submitLabel={currentTask.dialogConfig.submitLabel}
+          accentColor={colors.color}
         />
       )}
 

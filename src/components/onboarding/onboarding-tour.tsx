@@ -11,12 +11,12 @@ interface OnboardingTourProps {
 const steps = [
   {
     title: "Welcome to Your Skill Tree",
-    description: "Track your progress and unlock new skills as you complete tasks in Frontend, Backend, and DevOps.",
-    image: "🎮",
+    description: "Track your progress and launch a fund.",
+    image: "💰",
   },
   {
     title: "Navigate Your Dashboard",
-    description: "The pie chart shows your progress across all categories. Click on any category to dive into its skill tree.",
+    description: "The pie chart shows your progress across all categories. Click on any category to dive into its actionable tasks.",
     image: "📊",
   },
   {
@@ -62,7 +62,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         right: 0,
         bottom: 0,
         zIndex: 9999,
-        background: "rgba(247, 247, 247, 0.98)",
+        background: "rgba(255, 255, 255, 0.98)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

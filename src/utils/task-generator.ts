@@ -35,34 +35,6 @@ const INITIAL_TASKS_SKILLS = [
     tooltip: "Navigate to fund selection to choose your fund type"
   },
   {
-    name: "Understanding Fund Categories",
-    description: "Explore the three main fund categories and their requirements",
-    actionType: 'dialog' as const,
-    dialogConfig: {
-      title: "Fund Categories Overview",
-      fields: [
-        { name: 'primaryFocus', label: 'Which fund type interests you most?', type: 'select' as const, required: true, options: ['SFR (Single Family Rental)', 'Commercial Office/Retail', 'Specialty/Niche Assets'] },
-        { name: 'experience', label: 'Your real estate experience level', type: 'select' as const, required: true, options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'] },
-        { name: 'timeline', label: 'Preferred fund launch timeline', type: 'select' as const, required: true, options: ['3-6 months', '6-12 months', '12+ months'] }
-      ],
-      submitLabel: "Continue to Fund Setup"
-    }
-  },
-  {
-    name: "Task Dependencies",
-    description: "Complete tasks in order - each task unlocks the next",
-    actionType: 'dialog' as const,
-    dialogConfig: {
-      title: "Task Dependencies & Workflow",
-      fields: [
-        { name: 'workflow', label: 'How would you prefer to work through tasks?', type: 'select' as const, required: true, options: ['Sequential (one at a time)', 'Parallel (multiple at once)', 'Flexible (as needed)'] },
-        { name: 'reminders', label: 'Would you like task completion reminders?', type: 'select' as const, required: true, options: ['Yes, email reminders', 'Yes, in-app notifications', 'No reminders needed'] },
-        { name: 'collaboration', label: 'Will others be collaborating on this fund?', type: 'select' as const, required: true, options: ['Yes, team collaboration', 'No, working solo', 'Maybe later'] }
-      ],
-      submitLabel: "Set Preferences"
-    }
-  },
-  {
     name: "Basic Fund Information",
     description: "Set up your basic fund profile and contact information",
     actionType: 'dialog' as const,
@@ -76,21 +48,6 @@ const INITIAL_TASKS_SKILLS = [
         { name: 'location', label: 'Primary Location', type: 'text' as const, required: true }
       ],
       submitLabel: "Save Profile"
-    }
-  },
-  {
-    name: "Investment Preferences",
-    description: "Define your investment philosophy and risk tolerance",
-    actionType: 'dialog' as const,
-    dialogConfig: {
-      title: "Investment Preferences",
-      fields: [
-        { name: 'riskTolerance', label: 'Risk Tolerance', type: 'select' as const, required: true, options: ['Conservative', 'Moderate', 'Aggressive'] },
-        { name: 'investmentStyle', label: 'Investment Style', type: 'select' as const, required: true, options: ['Value Investing', 'Growth Investing', 'Income Focused', 'Opportunistic'] },
-        { name: 'geographicFocus', label: 'Geographic Focus', type: 'select' as const, required: true, options: ['Local Markets', 'Regional', 'National', 'International'] },
-        { name: 'timeHorizon', label: 'Investment Time Horizon', type: 'select' as const, required: true, options: ['1-3 years', '3-7 years', '7-10 years', '10+ years'] }
-      ],
-      submitLabel: "Set Preferences"
     }
   },
   {
@@ -163,6 +120,7 @@ const COMMERCIAL_INITIAL_TASKS: Array<{
     name: "Commercial Fund Setup",
     description: "Configure your Commercial Office/Retail fund parameters",
     actionType: 'dialog' as const,
+
     dialogConfig: {
       title: "Commercial Fund Configuration",
       fields: [
@@ -682,7 +640,9 @@ function generateCategoryTasks(
   return skills.map((skill, idx) => {
     const id = startId + idx;
     const completed = initialCompleted ? idx === 0 : false; // For initial tasks, first task starts completed
-    const dependencies = skill.dependencies || (idx > 0 ? [id - 1] : []);
+    
+    // Only use sequential dependencies within the category
+    const dependencies = idx > 0 ? [id - 1] : [];
     const parentId = idx > 0 ? id - 1 : null;
     const basePoints = 10 + idx * 5;
     const points = basePoints + Math.floor(Math.random() * 6); // Add 0-5 random points
@@ -743,14 +703,6 @@ export function getAllTasks(data: {
   specialty: Task[];
 }): Task[] {
   return [...data.initialTasks, ...data.sfr, ...data.commercial, ...data.specialty];
-}
-
-export function getCompletedCount(tasks: Task[]): number {
-  return tasks.filter((t) => t.completed).length;
-}
-
-export function getTotalCount(tasks: Task[]): number {
-  return tasks.length;
 }
 
 export function isInitialTasksComplete(tasks: Task[]): boolean {
