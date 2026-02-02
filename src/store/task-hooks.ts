@@ -1,8 +1,8 @@
 import { useSelector } from "react-redux";
 import { RootState } from "./index";
-import { isOnboardingComplete } from "../utils/task-generator";
+import { isInitialTasksComplete } from "../utils/task-generator";
 
-export function useCategoryStats(category: "onboarding" | "frontend" | "backend" | "devops") {
+export function useCategoryStats(category: "initialTasks" | "sfr" | "commercial" | "specialty") {
   return useSelector((state: RootState) => {
     const tasks = state.tasks[category];
     const completed = tasks.filter((t) => t.completed).length;
@@ -14,10 +14,10 @@ export function useCategoryStats(category: "onboarding" | "frontend" | "backend"
 export function useTaskStats() {
   return useSelector((state: RootState) => {
     const allTasks = [
-      ...state.tasks.onboarding,
-      ...state.tasks.frontend,
-      ...state.tasks.backend,
-      ...state.tasks.devops,
+      ...state.tasks.initialTasks,
+      ...state.tasks.sfr,
+      ...state.tasks.commercial,
+      ...state.tasks.specialty,
     ];
     const completed = allTasks.filter((t) => t.completed).length;
     const total = allTasks.length;
@@ -25,8 +25,8 @@ export function useTaskStats() {
   });
 }
 
-export function useIsOnboardingComplete() {
+export function useIsInitialTasksComplete() {
   return useSelector((state: RootState) => {
-    return isOnboardingComplete(state.tasks.onboarding);
+    return isInitialTasksComplete(state.tasks.initialTasks);
   });
 }
